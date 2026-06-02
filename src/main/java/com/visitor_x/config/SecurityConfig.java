@@ -22,13 +22,13 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(
-                                "/api/admin/**"
-                        ).authenticated()
+                                "/api/qr/**"
+                        ).permitAll()
 
                         .anyRequest()
                         .authenticated()
-                )
-                .httpBasic(Customizer.withDefaults());
+                );
+//                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }

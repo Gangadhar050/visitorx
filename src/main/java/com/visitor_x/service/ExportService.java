@@ -1,4 +1,9 @@
 package com.visitor_x.service;
 
-public class ExportService {
+import jakarta.servlet.http.HttpServletResponse;
+
+public interface ExportService {
+
+    void exportVisitors(
+            HttpServletResponse response);
 }

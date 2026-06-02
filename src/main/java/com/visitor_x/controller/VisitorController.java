@@ -8,14 +8,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/api/visitors")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class VisitorController {
 
     private final VisitorRepository visitorRepository;
 @PostMapping("/register")
-    public Visitor registerVisitor(@Valid @RequestParam VisitorRequestDTO request) {
+    public Visitor registerVisitor(@Valid @RequestBody VisitorRequestDTO request) {
         Visitor visitor = new Visitor();
         visitor.setName(request.getName());
         visitor.setEmail(request.getEmail());
