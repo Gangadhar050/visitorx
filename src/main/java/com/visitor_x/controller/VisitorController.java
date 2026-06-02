@@ -3,20 +3,19 @@ package com.visitor_x.controller;
 import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.repository.VisitorRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping
+@RequestMapping("/user")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 public class VisitorController {
 
     private final VisitorRepository visitorRepository;
-
-    public Visitor registerVisitor(VisitorRequestDTO request) {
+@PostMapping("/register")
+    public Visitor registerVisitor(@Valid @RequestParam VisitorRequestDTO request) {
         Visitor visitor = new Visitor();
         visitor.setName(request.getName());
         visitor.setEmail(request.getEmail());
