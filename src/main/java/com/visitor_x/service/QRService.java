@@ -1,4 +1,13 @@
 package com.visitor_x.service;
 
-public class QRService {
+
+import com.google.zxing.WriterException;
+
+import java.io.IOException;
+
+public interface QRService {
+
+    byte[] generateQRCode(String text)
+            throws WriterException, IOException;
+
 }

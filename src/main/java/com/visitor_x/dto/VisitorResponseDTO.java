@@ -14,6 +14,9 @@ public class VisitorResponseDTO {
     private Long visitorId;
     private String name;
     private String mobileNumber;
+    private String email;
+    private String address;
+    private String purposeOfVisit;
     private String photoUrl;
     private LocalDateTime visitDateTime;
 }
