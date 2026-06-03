@@ -1,6 +1,7 @@
 
 package com.visitor_x.controller;
 
+
 import com.google.zxing.WriterException;
 import com.visitor_x.service.QRService;
 import lombok.RequiredArgsConstructor;
@@ -64,3 +65,4 @@ public class QRController {
 //        return ResponseEntity.ok(qrCode);
 //    }
 //}
+
