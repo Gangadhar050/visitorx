@@ -10,6 +10,7 @@ import lombok.Data;
 public class DashboardResponse {
 
     private long totalVisitors;
-
     private long todayVisitors;
+    private long thisWeekVisitors;
+    private long thisMonthVisitors;
 }

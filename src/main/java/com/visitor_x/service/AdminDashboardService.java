@@ -1,7 +1,9 @@
 package com.visitor_x.service;
 
 import com.visitor_x.dto.DashboardResponse;
-import com.visitor_x.entity.Visitor;
+import com.visitor_x.dto.VisitorResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -9,11 +11,15 @@ public interface AdminDashboardService {
 
     DashboardResponse getDashboard();
 
-    List<Visitor> getAllVisitors();
+    Page<VisitorResponseDTO> getAllVisitors(Pageable pageable);
 
-    List<Visitor> searchVisitors(String keyword);
+    VisitorResponseDTO getVisitor(Long id);
 
-    Visitor getVisitor(Long id);
+    Page<VisitorResponseDTO> searchVisitors(String keyword, Pageable pageable);
+
+    List<VisitorResponseDTO> getTodayVisitors();
 
     void deleteVisitor(Long id);
+
+//    byte[] exportToExcel();
 }

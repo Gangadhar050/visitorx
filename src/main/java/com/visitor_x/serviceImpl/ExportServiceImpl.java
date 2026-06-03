@@ -1,9 +1,8 @@
-package com.visitor_x.service.impl;
+package com.visitor_x.serviceImpl;
 
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.service.ExportService;
-import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
@@ -14,93 +13,63 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ExportServiceImpl
-        implements ExportService {
+public class ExportServiceImpl implements ExportService {
 
     private final VisitorRepository repository;
 
     @Override
-    public void exportVisitors(
-            HttpServletResponse response) {
+    public void exportVisitors(HttpServletResponse response) {
+        List<Visitor> visitors = repository.findAll();
 
-        try {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Visitors");
 
-            List<Visitor> visitors =
-                    repository.findAll();
+            // Bold header style
+            CellStyle headerStyle = workbook.createCellStyle();
+            Font font = workbook.createFont();
+            font.setBold(true);
+            headerStyle.setFont(font);
 
-            Workbook workbook =
-                    new XSSFWorkbook();
+            String[] columns = {
+                    "ID", "Name", "Mobile", "Email",
+                    "Purpose", "Address", "Visit Time"
+            };
 
-            Sheet sheet =
-                    workbook.createSheet(
-                            "Visitors");
-
-            Row header =
-                    sheet.createRow(0);
-
-            header.createCell(0)
-                    .setCellValue("ID");
-
-            header.createCell(1)
-                    .setCellValue("Name");
-
-            header.createCell(2)
-                    .setCellValue("Mobile");
-
-            header.createCell(3)
-                    .setCellValue("Email");
-
-            header.createCell(4)
-                    .setCellValue("Purpose");
+            Row header = sheet.createRow(0);
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = header.createCell(i);
+                cell.setCellValue(columns[i]);
+                cell.setCellStyle(headerStyle);
+            }
 
             int rowNum = 1;
+            for (Visitor v : visitors) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(v.getVisitorId());
+                row.createCell(1).setCellValue(v.getName());
+                row.createCell(2).setCellValue(v.getMobileNumber());
+                row.createCell(3).setCellValue(v.getEmail());
+                row.createCell(4).setCellValue(v.getPurposeOfVisit());
+                row.createCell(5).setCellValue(v.getAddress());
+                row.createCell(6).setCellValue(
+                        v.getVisitDateTime() != null
+                                ? v.getVisitDateTime().toString() : "");
+            }
 
-            for (Visitor visitor : visitors) {
-
-                Row row =
-                        sheet.createRow(rowNum++);
-
-                row.createCell(0)
-                        .setCellValue(
-                                visitor.getVisitorId());
-
-                row.createCell(1)
-                        .setCellValue(
-                                visitor.getName());
-
-                row.createCell(2)
-                        .setCellValue(
-                                visitor.getMobileNumber());
-
-                row.createCell(3)
-                        .setCellValue(
-                                visitor.getEmail());
-
-                row.createCell(4)
-                        .setCellValue(
-                                visitor.getPurposeOfVisit());
+            for (int i = 0; i < columns.length; i++) {
+                sheet.autoSizeColumn(i);
             }
 
             response.setContentType(
-                    "application/octet-stream");
-
-            response.setHeader(
-                    "Content-Disposition",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition",
                     "attachment; filename=visitors.xlsx");
 
-            ServletOutputStream outputStream =
-                    response.getOutputStream();
-
-            workbook.write(outputStream);
-
-            workbook.close();
-
-            outputStream.close();
+            workbook.write(response.getOutputStream());
 
         } catch (Exception ex) {
-
             throw new RuntimeException(
-                    ex.getMessage());
+                    "Failed to export Excel: " + ex.getMessage());
         }
     }
 }

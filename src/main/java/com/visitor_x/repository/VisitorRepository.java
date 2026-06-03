@@ -1,27 +1,38 @@
 package com.visitor_x.repository;
 
 import com.visitor_x.entity.Visitor;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface VisitorRepository extends JpaRepository<Visitor, Long> {
 
+    Optional<Visitor> findByEmail(String email);
 
-    Optional<Visitor> findByEmail(@Email @NotBlank String email);
+    Optional<Visitor> findByMobileNumber(String mobileNumber);
 
-    Optional<Visitor> findByMobileNumber(@NotBlank String mobileNumber);
+    long countByVisitDateTimeBetween(LocalDateTime start, LocalDateTime end);
 
+    // Search by name OR mobile — matches the image
+    @Query("SELECT v FROM Visitor v WHERE " +
+            "LOWER(v.name) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "v.mobileNumber LIKE CONCAT('%', :keyword, '%')")
+    Page<Visitor> searchByNameOrMobile(
+            @Param("keyword") String keyword, Pageable pageable);
 
-    long countByVisitDateTimeBetween(
-            LocalDateTime start,
-            LocalDateTime end);
+    // Paginated full list
+    Page<Visitor> findAll(Pageable pageable);
 
-    List<Visitor> findByNameContainingIgnoreCase(String keyword);
+    // Today's visitors list
+    List<Visitor> findByVisitDateTimeBetween(
+            LocalDateTime start, LocalDateTime end);
+
+    Collection<Object> findByNameContainingIgnoreCase(String keyword);
 }

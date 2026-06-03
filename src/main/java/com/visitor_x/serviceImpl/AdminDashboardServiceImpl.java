@@ -1,15 +1,20 @@
-package com.visitor_x.service.impl;
+package com.visitor_x.serviceImpl;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.exception.ResourceNotFoundException;
 import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.service.AdminDashboardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 @Service
@@ -21,55 +26,81 @@ public class AdminDashboardServiceImpl
 
     @Override
     public DashboardResponse getDashboard() {
-
-        long totalVisitors =
-                visitorRepository.count();
-
         LocalDate today = LocalDate.now();
 
-        long todayVisitors =
-                visitorRepository.countByVisitDateTimeBetween(
-                        today.atStartOfDay(),
-                        today.plusDays(1).atStartOfDay());
+        LocalDateTime todayStart = today.atStartOfDay();
+        LocalDateTime todayEnd   = today.plusDays(1).atStartOfDay();
+
+        LocalDateTime weekStart = today.with(DayOfWeek.MONDAY).atStartOfDay();
+        LocalDateTime weekEnd   = today.with(DayOfWeek.SUNDAY)
+                .plusDays(1).atStartOfDay();
+
+        LocalDateTime monthStart = today
+                .with(TemporalAdjusters.firstDayOfMonth()).atStartOfDay();
+        LocalDateTime monthEnd   = today
+                .with(TemporalAdjusters.firstDayOfNextMonth()).atStartOfDay();
 
         return DashboardResponse.builder()
-                .totalVisitors(totalVisitors)
-                .todayVisitors(todayVisitors)
+                .totalVisitors(visitorRepository.count())
+                .todayVisitors(visitorRepository
+                        .countByVisitDateTimeBetween(todayStart, todayEnd))
+                .thisWeekVisitors(visitorRepository
+                        .countByVisitDateTimeBetween(weekStart, weekEnd))
+                .thisMonthVisitors(visitorRepository
+                        .countByVisitDateTimeBetween(monthStart, monthEnd))
                 .build();
     }
 
     @Override
-    public List<Visitor> getAllVisitors() {
-        return visitorRepository.findAll();
+    public Page<VisitorResponseDTO> getAllVisitors(Pageable pageable) {
+        return visitorRepository.findAll(pageable).map(this::toDTO);
     }
 
     @Override
-    public List<Visitor> searchVisitors(
-            String keyword) {
-
-        return visitorRepository
-                .findByNameContainingIgnoreCase(
-                        keyword);
-    }
-
-    @Override
-    public Visitor getVisitor(Long id) {
-
+    public VisitorResponseDTO getVisitor(Long id) {
         return visitorRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Visitor not found"));
+                .map(this::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Visitor not found with id: " + id));
+    }
+
+    @Override
+    public Page<VisitorResponseDTO> searchVisitors(
+            String keyword, Pageable pageable) {
+        return visitorRepository
+                .searchByNameOrMobile(keyword, pageable)
+                .map(this::toDTO);
+    }
+
+    @Override
+    public List<VisitorResponseDTO> getTodayVisitors() {
+        LocalDate today = LocalDate.now();
+        return visitorRepository
+                .findByVisitDateTimeBetween(
+                        today.atStartOfDay(),
+                        today.plusDays(1).atStartOfDay())
+                .stream().map(this::toDTO).toList();
     }
 
     @Override
     public void deleteVisitor(Long id) {
+        if (!visitorRepository.existsById(id)) {
+            throw new ResourceNotFoundException(
+                    "Visitor not found with id: " + id);
+        }
+        visitorRepository.deleteById(id);
+    }
 
-        Visitor visitor =
-                visitorRepository.findById(id)
-                        .orElseThrow(() ->
-                                new ResourceNotFoundException(
-                                        "Visitor not found"));
-
-        visitorRepository.delete(visitor);
+    private VisitorResponseDTO toDTO(Visitor v) {
+        return VisitorResponseDTO.builder()
+                .visitorId(v.getVisitorId())
+                .name(v.getName())
+                .email(v.getEmail())
+                .mobileNumber(v.getMobileNumber())
+                .address(v.getAddress())
+                .purposeOfVisit(v.getPurposeOfVisit())
+                .photoUrl(v.getPhotoUrl())
+                .visitDateTime(v.getVisitDateTime())
+                .build();
     }
 }
