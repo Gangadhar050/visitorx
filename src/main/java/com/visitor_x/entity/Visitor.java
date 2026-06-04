@@ -1,6 +1,5 @@
 package com.visitor_x.entity;
 
-import com.visitor_x.Enum.PurposeOfVisit;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,16 +21,15 @@ public class Visitor {
     @Column(nullable = false,length = 100)
     private String name;
 
-    @Column(nullable = false, length = 100, unique = true)
-    private String email;
-
-    @Column(nullable = false, length = 15, unique = true)
+    @Column(nullable = false,length = 15)
     private String mobileNumber;
+
+    @Column(nullable = false,length = 100)
+    private String email;
 
     private String address;
 
-    @Enumerated(EnumType.STRING)
-    private PurposeOfVisit purposeOfVisit;
+    private String purposeOfVisit;
 
     @Column(nullable = false)
     private String photoUrl;
