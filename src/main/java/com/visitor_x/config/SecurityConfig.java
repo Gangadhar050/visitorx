@@ -1,4 +1,3 @@
-
 package com.visitor_x.config;
 
 import com.visitor_x.security.JwtAuthFilter;
@@ -32,10 +31,15 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/api/auth/login",
                                 "/api/visitors/register",
-                                "/api/auth/login"
+                                "/api/admin/create"
                         ).permitAll()
-                        .requestMatchers("/api/admin/**", "/api/qr/**").hasRole("ADMIN")
+
+                        .requestMatchers(
+                                "/api/admin/**",
+                                "/api/qr/**"
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,
