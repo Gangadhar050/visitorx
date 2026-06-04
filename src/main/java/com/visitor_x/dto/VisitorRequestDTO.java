@@ -1,7 +1,6 @@
 package com.visitor_x.dto;
 
 
-import com.visitor_x.enums.PurposeOfVisit;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -23,7 +22,7 @@ public class VisitorRequestDTO {
 
     private String address;
 
-    private PurposeOfVisit purposeOfVisit;
+    private String purposeOfVisit;
 
     @NotBlank
     private String photoUrl;
