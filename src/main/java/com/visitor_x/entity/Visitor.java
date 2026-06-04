@@ -21,11 +21,11 @@ public class Visitor {
     @Column(nullable = false,length = 100)
     private String name;
 
-    @Column(nullable = false,length = 15)
-    private String mobileNumber;
-
-    @Column(nullable = false,length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String email;
+
+    @Column(nullable = false, length = 15, unique = true)
+    private String mobileNumber;
 
     private String address;
 
