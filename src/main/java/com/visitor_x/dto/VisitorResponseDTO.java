@@ -2,6 +2,7 @@ package com.visitor_x.dto;
 
 
 
+import com.visitor_x.Enum.PurposeOfVisit;
 import lombok.Builder;
 import lombok.Data;
 
@@ -16,7 +17,7 @@ public class VisitorResponseDTO {
     private String mobileNumber;
     private String email;
     private String address;
-    private String purposeOfVisit;
+    private PurposeOfVisit purposeOfVisit;
     private String photoUrl;
     private LocalDateTime visitDateTime;
 }

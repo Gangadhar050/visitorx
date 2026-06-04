@@ -1,5 +1,6 @@
 package com.visitor_x.entity;
 
+import com.visitor_x.Enum.PurposeOfVisit;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -29,7 +30,8 @@ public class Visitor {
 
     private String address;
 
-    private String purposeOfVisit;
+    @Enumerated(EnumType.STRING)
+    private PurposeOfVisit purposeOfVisit;
 
     @Column(nullable = false)
     private String photoUrl;
