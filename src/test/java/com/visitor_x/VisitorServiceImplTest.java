@@ -1,12 +1,13 @@
 package com.visitor_x;
 
+import com.visitor_x.Enum.PurposeOfVisit;
 import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
-import com.visitor_x.enums.PurposeOfVisit;
 import com.visitor_x.exception.DuplicateResourceException;
 import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.serviceImpl.VisitorServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,107 +30,106 @@ class VisitorServiceImplTest {
     @InjectMocks
     private VisitorServiceImpl visitorService;
 
-    @Test
-    void registerVisitor_ShouldSaveVisitorSuccessfully() {
+    private VisitorRequestDTO requestDTO;
+    private Visitor visitor;
 
-        VisitorRequestDTO request = new VisitorRequestDTO();
-        request.setName("John");
-        request.setEmail("john@gmail.com");
-        request.setMobileNumber("9876543210");
-        request.setAddress("Bangalore");
-        request.setPurposeOfVisit(PurposeOfVisit.valueOf("INTERVIEW"));
-        request.setPhotoUrl("photo.jpg");
+    @BeforeEach
+    void setUp() {
 
-        Visitor savedVisitor = Visitor.builder()
+        requestDTO = new VisitorRequestDTO();
+        requestDTO.setName("Gangadhar");
+        requestDTO.setEmail("gangadhar@gmail.com");
+        requestDTO.setMobileNumber("9876543210");
+        requestDTO.setAddress("Bangalore");
+        requestDTO.setPurposeOfVisit(PurposeOfVisit.valueOf("INTERVIEW"));
+        requestDTO.setPhotoUrl("photo.jpg");
+
+        visitor = Visitor.builder()
                 .visitorId(1L)
-                .name("John")
-                .email("john@gmail.com")
+                .name("Gangadhar")
+                .email("gangadhar@gmail.com")
                 .mobileNumber("9876543210")
                 .address("Bangalore")
                 .purposeOfVisit(PurposeOfVisit.valueOf("INTERVIEW"))
                 .photoUrl("photo.jpg")
                 .visitDateTime(LocalDateTime.now())
                 .build();
+    }
 
-        when(visitorRepository.findByEmail("john@gmail.com"))
+    @Test
+    void registerVisitor_Success() {
+
+        when(visitorRepository.findByEmail(requestDTO.getEmail()))
                 .thenReturn(Optional.empty());
 
-        when(visitorRepository.findByMobileNumber("9876543210"))
+        when(visitorRepository.findByMobileNumber(requestDTO.getMobileNumber()))
                 .thenReturn(Optional.empty());
 
         when(visitorRepository.save(any(Visitor.class)))
-                .thenReturn(savedVisitor);
+                .thenReturn(visitor);
 
         VisitorResponseDTO response =
-                visitorService.registerVisitor(request);
+                visitorService.registerVisitor(requestDTO);
 
         assertNotNull(response);
-        assertEquals("John", response.getName());
-        assertEquals("john@gmail.com", response.getEmail());
+        assertEquals(1L, response.getVisitorId());
+        assertEquals("Gangadhar", response.getName());
+        assertEquals("gangadhar@gmail.com", response.getEmail());
         assertEquals("9876543210", response.getMobileNumber());
 
-        verify(visitorRepository, times(1))
-                .save(any(Visitor.class));
+        verify(visitorRepository).findByEmail(requestDTO.getEmail());
+        verify(visitorRepository).findByMobileNumber(requestDTO.getMobileNumber());
+        verify(visitorRepository).save(any(Visitor.class));
     }
 
     @Test
-    void registerVisitor_ShouldThrowException_WhenEmailExists() {
+    void registerVisitor_WhenEmailAlreadyExists_ShouldThrowException() {
 
-        VisitorRequestDTO request = new VisitorRequestDTO();
-        request.setEmail("john@gmail.com");
-
-        Visitor visitor = new Visitor();
-
-        when(visitorRepository.findByEmail("john@gmail.com"))
+        when(visitorRepository.findByEmail(requestDTO.getEmail()))
                 .thenReturn(Optional.of(visitor));
 
-        assertThrows(
-                DuplicateResourceException.class,
-                () -> visitorService.registerVisitor(request)
+        DuplicateResourceException exception =
+                assertThrows(
+                        DuplicateResourceException.class,
+                        () -> visitorService.registerVisitor(requestDTO)
+                );
+
+        assertEquals(
+                "Email already registered",
+                exception.getMessage()
         );
 
-        verify(visitorRepository, never())
-                .save(any());
+        verify(visitorRepository).findByEmail(requestDTO.getEmail());
+        verify(visitorRepository, never()).save(any());
     }
 
     @Test
-    void registerVisitor_ShouldThrowException_WhenMobileExists() {
+    void registerVisitor_WhenMobileAlreadyExists_ShouldThrowException() {
 
-        VisitorRequestDTO request = new VisitorRequestDTO();
-        request.setEmail("john@gmail.com");
-        request.setMobileNumber("9876543210");
-
-        Visitor visitor = new Visitor();
-
-        when(visitorRepository.findByEmail("john@gmail.com"))
+        when(visitorRepository.findByEmail(requestDTO.getEmail()))
                 .thenReturn(Optional.empty());
 
-        when(visitorRepository.findByMobileNumber("9876543210"))
+        when(visitorRepository.findByMobileNumber(requestDTO.getMobileNumber()))
                 .thenReturn(Optional.of(visitor));
 
-        assertThrows(
-                DuplicateResourceException.class,
-                () -> visitorService.registerVisitor(request)
+        DuplicateResourceException exception =
+                assertThrows(
+                        DuplicateResourceException.class,
+                        () -> visitorService.registerVisitor(requestDTO)
+                );
+
+        assertEquals(
+                "Mobile number already registered",
+                exception.getMessage()
         );
 
-        verify(visitorRepository, never())
-                .save(any());
+        verify(visitorRepository).findByEmail(requestDTO.getEmail());
+        verify(visitorRepository).findByMobileNumber(requestDTO.getMobileNumber());
+        verify(visitorRepository, never()).save(any());
     }
 
     @Test
-    void registerVisitor_ShouldMapEntityToDTOCorrectly() {
-
-        VisitorRequestDTO request = new VisitorRequestDTO();
-        request.setName("John");
-        request.setEmail("john@gmail.com");
-        request.setMobileNumber("9876543210");
-
-        Visitor visitor = Visitor.builder()
-                .visitorId(1L)
-                .name("John")
-                .email("john@gmail.com")
-                .mobileNumber("9876543210")
-                .build();
+    void registerVisitor_VerifySaveCalledOnce() {
 
         when(visitorRepository.findByEmail(anyString()))
                 .thenReturn(Optional.empty());
@@ -137,14 +137,12 @@ class VisitorServiceImplTest {
         when(visitorRepository.findByMobileNumber(anyString()))
                 .thenReturn(Optional.empty());
 
-        when(visitorRepository.save(any()))
+        when(visitorRepository.save(any(Visitor.class)))
                 .thenReturn(visitor);
 
-        VisitorResponseDTO response =
-                visitorService.registerVisitor(request);
+        visitorService.registerVisitor(requestDTO);
 
-        assertEquals(1L, response.getVisitorId());
-        assertEquals("John", response.getName());
-        assertEquals("john@gmail.com", response.getEmail());
+        verify(visitorRepository, times(1))
+                .save(any(Visitor.class));
     }
 }

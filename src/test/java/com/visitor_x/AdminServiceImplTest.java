@@ -1,5 +1,6 @@
 package com.visitor_x;
 
+
 import com.visitor_x.dto.AdminRequestDTO;
 import com.visitor_x.dto.AdminResponseDTO;
 import com.visitor_x.entity.Admin;
@@ -7,6 +8,7 @@ import com.visitor_x.exception.DuplicateResourceException;
 import com.visitor_x.exception.ResourceNotFoundException;
 import com.visitor_x.repository.AdminRepository;
 import com.visitor_x.serviceImpl.AdminServiceImpl;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,19 +35,26 @@ class AdminServiceImplTest {
     @InjectMocks
     private AdminServiceImpl adminService;
 
-    @Test
-    void createAdmin_ShouldCreateSuccessfully() {
+    private Admin admin;
+    private AdminRequestDTO requestDTO;
 
-        AdminRequestDTO request = new AdminRequestDTO();
-        request.setUsername("admin");
-        request.setPassword("admin123");
+    @BeforeEach
+    void setUp() {
 
-        Admin savedAdmin = Admin.builder()
+        requestDTO = new AdminRequestDTO();
+        requestDTO.setUsername("admin");
+        requestDTO.setPassword("admin123");
+
+        admin = Admin.builder()
                 .adminId(1L)
                 .username("admin")
                 .password("encodedPassword")
                 .role("ADMIN")
                 .build();
+    }
+
+    @Test
+    void createAdmin_Success() {
 
         when(adminRepository.findByUsername("admin"))
                 .thenReturn(Optional.empty());
@@ -53,97 +63,99 @@ class AdminServiceImplTest {
                 .thenReturn("encodedPassword");
 
         when(adminRepository.save(any(Admin.class)))
-                .thenReturn(savedAdmin);
+                .thenReturn(admin);
 
         AdminResponseDTO response =
-                adminService.createAdmin(request);
+                adminService.createAdmin(requestDTO);
 
         assertNotNull(response);
         assertEquals(1L, response.getAdminId());
         assertEquals("admin", response.getUsername());
         assertEquals("ADMIN", response.getRole());
 
+        verify(adminRepository).findByUsername("admin");
         verify(passwordEncoder).encode("admin123");
         verify(adminRepository).save(any(Admin.class));
     }
 
     @Test
-    void createAdmin_ShouldThrowException_WhenUsernameExists() {
-
-        AdminRequestDTO request = new AdminRequestDTO();
-        request.setUsername("admin");
+    void createAdmin_WhenUsernameExists_ShouldThrowException() {
 
         when(adminRepository.findByUsername("admin"))
-                .thenReturn(Optional.of(new Admin()));
+                .thenReturn(Optional.of(admin));
 
-        assertThrows(
-                DuplicateResourceException.class,
-                () -> adminService.createAdmin(request)
+        DuplicateResourceException exception =
+                assertThrows(
+                        DuplicateResourceException.class,
+                        () -> adminService.createAdmin(requestDTO)
+                );
+
+        assertEquals(
+                "Username already exists",
+                exception.getMessage()
         );
 
+        verify(adminRepository).findByUsername("admin");
         verify(adminRepository, never()).save(any());
     }
 
     @Test
-    void getAdmin_ShouldReturnAdmin_WhenIdExists() {
+    void getAdmin_Success() {
 
-        Long id = 1L;
-
-        Admin admin = Admin.builder()
-                .adminId(id)
-                .username("admin")
-                .role("ADMIN")
-                .build();
-
-        when(adminRepository.findById(id))
+        when(adminRepository.findById(1L))
                 .thenReturn(Optional.of(admin));
 
         AdminResponseDTO response =
-                adminService.getAdmin(id);
+                adminService.getAdmin(1L);
 
-        assertEquals(id, response.getAdminId());
+        assertNotNull(response);
+        assertEquals(1L, response.getAdminId());
         assertEquals("admin", response.getUsername());
+        assertEquals("ADMIN", response.getRole());
     }
 
     @Test
-    void getAdmin_ShouldThrowException_WhenIdNotFound() {
+    void getAdmin_NotFound_ShouldThrowException() {
 
         when(adminRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> adminService.getAdmin(1L)
+        ResourceNotFoundException exception =
+                assertThrows(
+                        ResourceNotFoundException.class,
+                        () -> adminService.getAdmin(1L)
+                );
+
+        assertEquals(
+                "Admin not found with id: 1",
+                exception.getMessage()
         );
     }
 
     @Test
-    void getAllAdmins_ShouldReturnAdminList() {
+    void getAllAdmins_Success() {
 
-        List<Admin> admins = List.of(
-                Admin.builder()
-                        .adminId(1L)
-                        .username("admin1")
-                        .role("ADMIN")
-                        .build(),
-                Admin.builder()
-                        .adminId(2L)
-                        .username("admin2")
-                        .role("ADMIN")
-                        .build()
-        );
+        Admin admin2 = Admin.builder()
+                .adminId(2L)
+                .username("superadmin")
+                .role("ADMIN")
+                .build();
 
         when(adminRepository.findAll())
-                .thenReturn(admins);
+                .thenReturn(List.of(admin, admin2));
 
         List<AdminResponseDTO> result =
                 adminService.getAllAdmins();
 
+        assertNotNull(result);
         assertEquals(2, result.size());
+
+        assertEquals("admin", result.get(0).getUsername());
+        assertEquals("superadmin", result.get(1).getUsername());
     }
 
     @Test
-    void getAllAdmins_ShouldReturnEmptyList() {
+    void getAllAdmins_EmptyList() {
 
         when(adminRepository.findAll())
                 .thenReturn(List.of());
@@ -151,31 +163,37 @@ class AdminServiceImplTest {
         List<AdminResponseDTO> result =
                 adminService.getAllAdmins();
 
+        assertNotNull(result);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    void deleteAdmin_ShouldDeleteSuccessfully() {
+    void deleteAdmin_Success() {
 
-        Long id = 1L;
-
-        when(adminRepository.existsById(id))
+        when(adminRepository.existsById(1L))
                 .thenReturn(true);
 
-        adminService.deleteAdmin(id);
+        assertDoesNotThrow(() ->
+                adminService.deleteAdmin(1L));
 
-        verify(adminRepository).deleteById(id);
+        verify(adminRepository).deleteById(1L);
     }
 
     @Test
-    void deleteAdmin_ShouldThrowException_WhenIdNotFound() {
+    void deleteAdmin_NotFound_ShouldThrowException() {
 
         when(adminRepository.existsById(1L))
                 .thenReturn(false);
 
-        assertThrows(
-                ResourceNotFoundException.class,
-                () -> adminService.deleteAdmin(1L)
+        ResourceNotFoundException exception =
+                assertThrows(
+                        ResourceNotFoundException.class,
+                        () -> adminService.deleteAdmin(1L)
+                );
+
+        assertEquals(
+                "Admin not found with id: 1",
+                exception.getMessage()
         );
 
         verify(adminRepository, never())

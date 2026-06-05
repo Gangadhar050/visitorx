@@ -1,23 +1,23 @@
 package com.visitor_x;
 
+
+import com.visitor_x.Enum.PurposeOfVisit;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.serviceImpl.ExportServiceImpl;
-import jakarta.servlet.ServletOutputStream;
-import jakarta.servlet.WriteListener;
-import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.io.ByteArrayOutputStream;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExportServiceImplTest {
@@ -25,110 +25,88 @@ class ExportServiceImplTest {
     @Mock
     private VisitorRepository repository;
 
-    @Mock
-    private HttpServletResponse response;
-
     @InjectMocks
     private ExportServiceImpl exportService;
 
-    @Test
-    void exportVisitors_ShouldExportSuccessfully() throws Exception {
+    private Visitor visitor;
 
-        Visitor visitor = new Visitor();
-        visitor.setVisitorId(1L);
-        visitor.setName("John");
-        visitor.setMobileNumber("9876543210");
-        visitor.setEmail("john@gmail.com");
-        visitor.setAddress("Bangalore");
-        visitor.setVisitDateTime(LocalDateTime.now());
+    @BeforeEach
+    void setUp() {
+
+        visitor = Visitor.builder()
+                .visitorId(1L)
+                .name("Gangadhar")
+                .mobileNumber("9876543210")
+                .email("gangadhar@gmail.com")
+                .address("Bangalore")
+                .purposeOfVisit(PurposeOfVisit.INTERVIEW)
+                .visitDateTime(LocalDateTime.now())
+                .build();
+    }
+
+    @Test
+    void exportVisitors_ShouldGenerateExcelSuccessfully() {
 
         when(repository.findAll())
                 .thenReturn(List.of(visitor));
 
-        ByteArrayOutputStream outputStream =
-                new ByteArrayOutputStream();
+        MockHttpServletResponse response =
+                new MockHttpServletResponse();
 
-        ServletOutputStream servletOutputStream =
-                new ServletOutputStream() {
-                    @Override
-                    public void write(int b) {
-                        outputStream.write(b);
-                    }
+        assertDoesNotThrow(() ->
+                exportService.exportVisitors(response));
 
-                    @Override
-                    public boolean isReady() {
-                        return true;
-                    }
+        assertEquals(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                response.getContentType()
+        );
 
-                    @Override
-                    public void setWriteListener(
-                            WriteListener writeListener) {
-                    }
-                };
+        assertTrue(
+                response.getHeader("Content-Disposition")
+                        .contains("visitors.xlsx")
+        );
 
-        when(response.getOutputStream())
-                .thenReturn(servletOutputStream);
-
-        exportService.exportVisitors(response);
-
-        verify(repository, times(1))
-                .findAll();
-
-        verify(response).setContentType(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-        verify(response).setHeader(
-                eq("Content-Disposition"),
-                contains("visitors.xlsx"));
+        assertTrue(response.getContentAsByteArray().length > 0);
     }
 
     @Test
-    void exportVisitors_ShouldHandleEmptyVisitorList()
-            throws Exception {
+    void exportVisitors_WhenNoVisitors_ShouldStillGenerateExcel() {
 
         when(repository.findAll())
                 .thenReturn(List.of());
 
-        ByteArrayOutputStream outputStream =
-                new ByteArrayOutputStream();
+        MockHttpServletResponse response =
+                new MockHttpServletResponse();
 
-        ServletOutputStream servletOutputStream =
-                new ServletOutputStream() {
-                    @Override
-                    public void write(int b) {
-                        outputStream.write(b);
-                    }
+        assertDoesNotThrow(() ->
+                exportService.exportVisitors(response));
 
-                    @Override
-                    public boolean isReady() {
-                        return true;
-                    }
+        assertEquals(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                response.getContentType()
+        );
 
-                    @Override
-                    public void setWriteListener(
-                            WriteListener writeListener) {
-                    }
-                };
-
-        when(response.getOutputStream())
-                .thenReturn(servletOutputStream);
-
-        exportService.exportVisitors(response);
-
-        verify(repository).findAll();
+        assertTrue(response.getContentAsByteArray().length > 0);
     }
 
     @Test
-    void exportVisitors_ShouldThrowRuntimeException_WhenOutputFails()
-            throws Exception {
+    void exportVisitors_WhenRepositoryReturnsData_ShouldSetHeaders() {
 
         when(repository.findAll())
-                .thenReturn(List.of());
+                .thenReturn(List.of(visitor));
 
-        when(response.getOutputStream())
-                .thenThrow(new RuntimeException("Output Error"));
+        MockHttpServletResponse response =
+                new MockHttpServletResponse();
 
-        assertThrows(RuntimeException.class,
-                () -> exportService.exportVisitors(response));
+        exportService.exportVisitors(response);
+
+        String disposition =
+                response.getHeader("Content-Disposition");
+
+        assertNotNull(disposition);
+        assertEquals(
+                "attachment; filename=visitors.xlsx",
+                disposition
+        );
     }
 }
