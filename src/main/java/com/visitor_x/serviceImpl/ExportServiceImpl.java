@@ -49,7 +49,8 @@ public class ExportServiceImpl implements ExportService {
                 row.createCell(1).setCellValue(v.getName());
                 row.createCell(2).setCellValue(v.getMobileNumber());
                 row.createCell(3).setCellValue(v.getEmail());
-                row.createCell(4).setCellValue(v.getPurposeOfVisit().ordinal());
+                row.createCell(4).setCellValue(
+                        v.getPurposeOfVisit() != null ? v.getPurposeOfVisit() : "");
                 row.createCell(5).setCellValue(v.getAddress());
                 row.createCell(6).setCellValue(
                         v.getVisitDateTime() != null
