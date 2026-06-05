@@ -41,7 +41,7 @@ class VisitorServiceImplTest {
         requestDTO.setEmail("gangadhar@gmail.com");
         requestDTO.setMobileNumber("9876543210");
         requestDTO.setAddress("Bangalore");
-        requestDTO.setPurposeOfVisit(PurposeOfVisit.valueOf("INTERVIEW"));
+        requestDTO.setPurposeOfVisit(String.valueOf(PurposeOfVisit.valueOf("INTERVIEW")));
         requestDTO.setPhotoUrl("photo.jpg");
 
         visitor = Visitor.builder()
@@ -50,7 +50,7 @@ class VisitorServiceImplTest {
                 .email("gangadhar@gmail.com")
                 .mobileNumber("9876543210")
                 .address("Bangalore")
-                .purposeOfVisit(PurposeOfVisit.valueOf("INTERVIEW"))
+                .purposeOfVisit(String.valueOf(PurposeOfVisit.valueOf("INTERVIEW")))
                 .photoUrl("photo.jpg")
                 .visitDateTime(LocalDateTime.now())
                 .build();
