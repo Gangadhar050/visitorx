@@ -33,6 +33,6 @@ public interface VisitorRepository extends JpaRepository<Visitor, Long> {
     // Today's visitors list
     List<Visitor> findByVisitDateTimeBetween(
             LocalDateTime start, LocalDateTime end);
-
-    Collection<Object> findByNameContainingIgnoreCase(String keyword);
+//
+//    Collection<Object> findByNameContainingIgnoreCase(String keyword);
 }

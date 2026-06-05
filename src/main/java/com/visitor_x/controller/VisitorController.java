@@ -23,5 +23,6 @@ public class VisitorController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(visitorService
                         .registerVisitor(request));
+
     }
 }
