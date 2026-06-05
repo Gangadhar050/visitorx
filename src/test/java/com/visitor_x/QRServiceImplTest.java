@@ -72,15 +72,6 @@ class QRServiceImplTest {
         assertTrue(Files.exists(Path.of(customDir)));
     }
 
-//    @Test
-//    void generateQRCode_WithEmptyText_ShouldStillGenerateQr()
-//            throws WriterException, IOException {
-//
-//        byte[] result = qrService.generateQRCode("");
-//
-//        assertNotNull(result);
-//        assertTrue(result.length > 0);
-//    }
 
     @Test
     void saveQRCode_ShouldGenerateUniqueFileNames()
