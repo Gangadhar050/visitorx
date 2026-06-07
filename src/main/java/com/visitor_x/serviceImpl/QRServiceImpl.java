@@ -55,10 +55,16 @@ public class QRServiceImpl implements QRService {
 
         MatrixToImageWriter.writeToPath(encode(text), "PNG", filePath);
 
+        if(!Files.exists(filePath)) {
+            throw new IOException("Failed to save QR code image");
+        }
         return filePath.toAbsolutePath().toString();
     }
 
     private BitMatrix encode(String text) throws WriterException {
+        if (text == null || text.trim().isEmpty()) {
+            throw new IllegalArgumentException("QR text cannot be empty");
+        }
         return new QRCodeWriter()
                 .encode(text, BarcodeFormat.QR_CODE, 300, 300);
     }

@@ -67,5 +67,6 @@ public class GlobalExceptionHandler {
         response.put("message", message);
 
         return new ResponseEntity<>(response, status);
+
     }
 }

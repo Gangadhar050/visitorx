@@ -53,11 +53,22 @@ public class AdminDashboardServiceImpl
 
     @Override
     public Page<VisitorResponseDTO> getAllVisitors(Pageable pageable) {
+        if (!visitorRepository.existsById(1L)) {
+            throw new ResourceNotFoundException(
+                    "No visitors found");
+        }
         return visitorRepository.findAll(pageable).map(this::toDTO);
     }
 
     @Override
     public VisitorResponseDTO getVisitor(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid visitor ID: " + id);
+        }if (!visitorRepository.existsById(id)) {
+            throw new ResourceNotFoundException(
+                    "Visitor not found with id: " + id);
+        }
         return visitorRepository.findById(id)
                 .map(this::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -67,6 +78,14 @@ public class AdminDashboardServiceImpl
     @Override
     public Page<VisitorResponseDTO> searchVisitors(
             String keyword, Pageable pageable) {
+        if (keyword == null || keyword.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Search keyword cannot be empty");
+        }
+        if (!visitorRepository.existsById(1L)) {
+            throw new ResourceNotFoundException(
+                    "No visitors found matching: " + keyword);
+        }
         return visitorRepository
                 .searchByNameOrMobile(keyword, pageable)
                 .map(this::toDTO);
@@ -75,6 +94,10 @@ public class AdminDashboardServiceImpl
     @Override
     public List<VisitorResponseDTO> getTodayVisitors() {
         LocalDate today = LocalDate.now();
+        if (!visitorRepository.existsById(1L)) {
+            throw new ResourceNotFoundException(
+                    "No visitors found for today");
+        }
         return visitorRepository
                 .findByVisitDateTimeBetween(
                         today.atStartOfDay(),
