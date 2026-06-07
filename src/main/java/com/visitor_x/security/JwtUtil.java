@@ -13,10 +13,10 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("visitor-x-super-secret-key-change-in-prod-32chars")
+    @Value("${jwt.secret}")
     private String secret;
 
-    @Value("86400000")
+    @Value("${jwt.expiration}")
     private long expiration;
 
     private SecretKey getSigningKey() {
