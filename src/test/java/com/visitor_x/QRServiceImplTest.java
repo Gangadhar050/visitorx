@@ -72,7 +72,14 @@ class QRServiceImplTest {
         assertTrue(Files.exists(Path.of(customDir)));
     }
 
+    @Test
+    void generateQRCode_WithEmptyText_ShouldThrowException(){
+        assertThrows
+                (IllegalArgumentException.class,
+                    ()-> qrService.generateQRCode("")
+        );
 
+    }
     @Test
     void saveQRCode_ShouldGenerateUniqueFileNames()
             throws Exception {

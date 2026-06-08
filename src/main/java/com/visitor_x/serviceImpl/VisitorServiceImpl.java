@@ -5,6 +5,7 @@ import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.exception.DuplicateResourceException;
 import com.visitor_x.repository.VisitorRepository;
+import com.visitor_x.service.ExportService;
 import com.visitor_x.service.VisitorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,7 @@ public class VisitorServiceImpl implements VisitorService {
                 .build();
 
         Visitor saved = visitorRepository.save(visitor);
+
         return toDTO(saved);
     }
 
