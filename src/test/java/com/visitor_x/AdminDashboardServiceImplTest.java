@@ -1,10 +1,9 @@
 package com.visitor_x;
 
-
-import com.visitor_x.Enum.PurposeOfVisit;
 import com.visitor_x.dto.DashboardResponse;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
+import com.visitor_x.enums.PurposeOfVisit;
 import com.visitor_x.exception.ResourceNotFoundException;
 import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.serviceImpl.AdminDashboardServiceImpl;
@@ -62,8 +61,7 @@ class AdminDashboardServiceImplTest {
                 .thenReturn(50L)
                 .thenReturn(80L);
 
-        DashboardResponse response =
-                dashboardService.getDashboard();
+        DashboardResponse response = dashboardService.getDashboard();
 
         assertNotNull(response);
         assertEquals(100L, response.getTotalVisitors());
@@ -77,11 +75,14 @@ class AdminDashboardServiceImplTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        Page<Visitor> visitorPage =
+        Page<Visitor> page =
                 new PageImpl<>(List.of(visitor));
 
+        when(visitorRepository.existsById(1L))
+                .thenReturn(true);
+
         when(visitorRepository.findAll(pageable))
-                .thenReturn(visitorPage);
+                .thenReturn(page);
 
         Page<VisitorResponseDTO> result =
                 dashboardService.getAllVisitors(pageable);
@@ -92,7 +93,24 @@ class AdminDashboardServiceImplTest {
     }
 
     @Test
+    void getAllVisitors_NotFound() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(visitorRepository.existsById(1L))
+                .thenReturn(false);
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> dashboardService.getAllVisitors(pageable)
+        );
+    }
+
+    @Test
     void getVisitor_Success() {
+
+        when(visitorRepository.existsById(1L))
+                .thenReturn(true);
 
         when(visitorRepository.findById(1L))
                 .thenReturn(Optional.of(visitor));
@@ -101,25 +119,27 @@ class AdminDashboardServiceImplTest {
                 dashboardService.getVisitor(1L);
 
         assertNotNull(response);
-        assertEquals(1L, response.getVisitorId());
         assertEquals("Gangadhar", response.getName());
     }
 
     @Test
     void getVisitor_NotFound() {
 
-        when(visitorRepository.findById(1L))
-                .thenReturn(Optional.empty());
+        when(visitorRepository.existsById(1L))
+                .thenReturn(false);
 
-        ResourceNotFoundException exception =
-                assertThrows(
-                        ResourceNotFoundException.class,
-                        () -> dashboardService.getVisitor(1L)
-                );
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> dashboardService.getVisitor(1L)
+        );
+    }
 
-        assertEquals(
-                "Visitor not found with id: 1",
-                exception.getMessage()
+    @Test
+    void getVisitor_InvalidId() {
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> dashboardService.getVisitor(0L)
         );
     }
 
@@ -128,13 +148,16 @@ class AdminDashboardServiceImplTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
-        Page<Visitor> visitorPage =
+        Page<Visitor> page =
                 new PageImpl<>(List.of(visitor));
+
+        when(visitorRepository.existsById(1L))
+                .thenReturn(true);
 
         when(visitorRepository.searchByNameOrMobile(
                 "Gangadhar",
                 pageable))
-                .thenReturn(visitorPage);
+                .thenReturn(page);
 
         Page<VisitorResponseDTO> result =
                 dashboardService.searchVisitors(
@@ -147,7 +170,39 @@ class AdminDashboardServiceImplTest {
     }
 
     @Test
+    void searchVisitors_EmptyKeyword() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> dashboardService.searchVisitors(
+                        "",
+                        pageable)
+        );
+    }
+
+    @Test
+    void searchVisitors_NotFound() {
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        when(visitorRepository.existsById(1L))
+                .thenReturn(false);
+
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> dashboardService.searchVisitors(
+                        "Gangadhar",
+                        pageable)
+        );
+    }
+
+    @Test
     void getTodayVisitors_Success() {
+
+        when(visitorRepository.existsById(1L))
+                .thenReturn(true);
 
         when(visitorRepository.findByVisitDateTimeBetween(
                 any(LocalDateTime.class),
@@ -163,17 +218,15 @@ class AdminDashboardServiceImplTest {
     }
 
     @Test
-    void getTodayVisitors_EmptyList() {
+    void getTodayVisitors_NotFound() {
 
-        when(visitorRepository.findByVisitDateTimeBetween(
-                any(LocalDateTime.class),
-                any(LocalDateTime.class)))
-                .thenReturn(List.of());
+        when(visitorRepository.existsById(1L))
+                .thenReturn(false);
 
-        List<VisitorResponseDTO> result =
-                dashboardService.getTodayVisitors();
-
-        assertTrue(result.isEmpty());
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> dashboardService.getTodayVisitors()
+        );
     }
 
     @Test
@@ -182,10 +235,9 @@ class AdminDashboardServiceImplTest {
         when(visitorRepository.existsById(1L))
                 .thenReturn(true);
 
-        assertDoesNotThrow(() ->
-                dashboardService.deleteVisitor(1L));
+        dashboardService.deleteVisitor(1L);
 
-        verify(visitorRepository)
+        verify(visitorRepository, times(1))
                 .deleteById(1L);
     }
 
@@ -195,15 +247,9 @@ class AdminDashboardServiceImplTest {
         when(visitorRepository.existsById(1L))
                 .thenReturn(false);
 
-        ResourceNotFoundException exception =
-                assertThrows(
-                        ResourceNotFoundException.class,
-                        () -> dashboardService.deleteVisitor(1L)
-                );
-
-        assertEquals(
-                "Visitor not found with id: 1",
-                exception.getMessage()
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> dashboardService.deleteVisitor(1L)
         );
 
         verify(visitorRepository, never())

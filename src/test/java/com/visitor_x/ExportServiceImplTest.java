@@ -1,7 +1,7 @@
 package com.visitor_x;
 
 
-import com.visitor_x.Enum.PurposeOfVisit;
+import com.visitor_x.enums.PurposeOfVisit;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.serviceImpl.ExportServiceImpl;

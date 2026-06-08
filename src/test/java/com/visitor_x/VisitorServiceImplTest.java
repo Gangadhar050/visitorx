@@ -1,6 +1,6 @@
 package com.visitor_x;
 
-import com.visitor_x.Enum.PurposeOfVisit;
+import com.visitor_x.enums.PurposeOfVisit;
 import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
