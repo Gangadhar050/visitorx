@@ -31,6 +31,12 @@ public class QRController {
         return ResponseEntity.ok(
                 qrService.generateQRCode(visitorFormUrl));
     }
+//new
+    @GetMapping("/generate-form")
+    public ResponseEntity<String> generateFormQr() throws Exception {
+        String path = qrService.saveVisitorFormQRCode();
+        return ResponseEntity.ok(path);
+    }
 
     // Saves QR to folder and returns file path
     @PreAuthorize("hasRole('ADMIN')")

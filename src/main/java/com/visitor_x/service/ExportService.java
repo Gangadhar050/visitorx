@@ -6,6 +6,6 @@ public interface ExportService {
 
     void exportVisitors(
             HttpServletResponse response);
-
+    void autoSaveToFile();
 
 }
