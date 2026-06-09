@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class VisitorServiceImpl implements VisitorService {
 
     private final VisitorRepository visitorRepository;
+    private final ExportService exportService;
 
     @Override
     @Transactional
@@ -43,6 +44,7 @@ public class VisitorServiceImpl implements VisitorService {
                 .build();
 
         Visitor saved = visitorRepository.save(visitor);
+        exportService.autoSaveToFile();
 
         return toDTO(saved);
     }

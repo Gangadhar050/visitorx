@@ -61,6 +61,10 @@ public class AdminServiceImpl implements AdminService {
             throw new ResourceNotFoundException(
                     "Admin not found with id: " + id);
         }
+        if (adminRepository.count() == 1) {
+            throw new IllegalStateException(
+                    "Cannot delete the last admin");
+        }
         adminRepository.deleteById(id);
     }
     @Override

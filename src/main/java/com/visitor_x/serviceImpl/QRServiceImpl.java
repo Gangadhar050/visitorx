@@ -23,6 +23,17 @@ public class QRServiceImpl implements QRService {
     @Value("${app.qr.save-path}")
     private String savePath;
 
+    //NEW
+    @Value("${app.form.base-url}")
+    private String formBaseUrl;
+
+// NEW
+    @Override
+    public String saveVisitorFormQRCode() throws WriterException, IOException {
+        String formUrl = formBaseUrl + "/visitor-api-tester.html";
+        return saveQRCode(formUrl);
+    }
+
     @Override
     public byte[] generateQRCode(String text)
             throws WriterException, IOException {
