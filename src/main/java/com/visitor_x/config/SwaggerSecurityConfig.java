@@ -1,5 +1,6 @@
 package com.visitor_x.config;
 
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -12,6 +13,7 @@ public class SwaggerSecurityConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
+                .addSecurityItem(new SecurityRequirement().addList("Bearer"))
                 .components(new Components()
                         .addSecuritySchemes("Bearer", new SecurityScheme()
                                 .type(SecurityScheme.Type.HTTP)
