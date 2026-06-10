@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")  // all endpoints require ADMIN JWT
 public class AdminController {
 
     private final AdminService adminService;
@@ -30,23 +29,27 @@ public class AdminController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AdminResponseDTO> getAdmin(
             @PathVariable Long id) {
         return ResponseEntity.ok(adminService.getAdmin(id));
     }
 
     @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<AdminResponseDTO>> getAllAdmins() {
         return ResponseEntity.ok(adminService.getAllAdmins());
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteAdmin(
             @PathVariable Long id) {
         adminService.deleteAdmin(id);
         return ResponseEntity.noContent().build();
     }
     @PutMapping("/change-password")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> changePassword(
             @RequestBody ChangePasswordRequestDTO request,
             Authentication authentication) {
