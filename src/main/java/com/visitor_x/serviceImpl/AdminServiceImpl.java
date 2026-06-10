@@ -65,6 +65,7 @@ public class AdminServiceImpl implements AdminService {
             throw new IllegalStateException(
                     "Cannot delete the last admin");
         }
+
         adminRepository.deleteById(id);
     }
     @Override

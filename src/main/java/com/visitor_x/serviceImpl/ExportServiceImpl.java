@@ -111,6 +111,9 @@ public class ExportServiceImpl implements ExportService {
             row.createCell(6).setCellValue(
                     v.getVisitDateTime() != null
                             ? v.getVisitDateTime().toString() : "");
+            row.createCell(7).setCellValue(v.getPhotoUrl() != null
+                    ? v.getPhotoUrl() : "");
+
         }
 
         for (int i = 0; i < columns.length; i++) {
