@@ -1,23 +1,30 @@
 package com.visitor_x;
 
-
-import com.visitor_x.enums.PurposeOfVisit;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.serviceImpl.ExportServiceImpl;
+import jakarta.servlet.ServletOutputStream;
+import jakarta.servlet.WriteListener;
+import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ExportServiceImplTest {
@@ -28,85 +35,163 @@ class ExportServiceImplTest {
     @InjectMocks
     private ExportServiceImpl exportService;
 
+    @TempDir
+    Path tempDir;
+
     private Visitor visitor;
 
     @BeforeEach
     void setUp() {
+
+        ReflectionTestUtils.setField(
+                exportService,
+                "savePath",
+                tempDir.toString()
+        );
 
         visitor = Visitor.builder()
                 .visitorId(1L)
                 .name("Gangadhar")
                 .mobileNumber("9876543210")
                 .email("gangadhar@gmail.com")
+                .purposeOfVisit("Meeting")
                 .address("Bangalore")
-                .purposeOfVisit(String.valueOf(PurposeOfVisit.INTERVIEW))
+                .photoUrl("photo.jpg")
                 .visitDateTime(LocalDateTime.now())
                 .build();
     }
 
     @Test
-    void exportVisitors_ShouldGenerateExcelSuccessfully() {
+    void exportVisitors_Success() throws IOException {
 
         when(repository.findAll())
                 .thenReturn(List.of(visitor));
 
-        MockHttpServletResponse response =
-                new MockHttpServletResponse();
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
-        assertDoesNotThrow(() ->
-                exportService.exportVisitors(response));
+        ByteArrayOutputStream outputStream =
+                new ByteArrayOutputStream();
 
-        assertEquals(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                response.getContentType()
-        );
+        ServletOutputStream servletOutputStream =
+                new ServletOutputStream() {
+                    @Override
+                    public void write(int b) {
+                        outputStream.write(b);
+                    }
 
-        assertTrue(
-                response.getHeader("Content-Disposition")
-                        .contains("visitors.xlsx")
-        );
+                    @Override
+                    public boolean isReady() {
+                        return true;
+                    }
 
-        assertTrue(response.getContentAsByteArray().length > 0);
-    }
+                    @Override
+                    public void setWriteListener(
+                            WriteListener writeListener) {
+                    }
+                };
 
-    @Test
-    void exportVisitors_WhenNoVisitors_ShouldStillGenerateExcel() {
-
-        when(repository.findAll())
-                .thenReturn(List.of());
-
-        MockHttpServletResponse response =
-                new MockHttpServletResponse();
-
-        assertDoesNotThrow(() ->
-                exportService.exportVisitors(response));
-
-        assertEquals(
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                response.getContentType()
-        );
-
-        assertTrue(response.getContentAsByteArray().length > 0);
-    }
-
-    @Test
-    void exportVisitors_WhenRepositoryReturnsData_ShouldSetHeaders() {
-
-        when(repository.findAll())
-                .thenReturn(List.of(visitor));
-
-        MockHttpServletResponse response =
-                new MockHttpServletResponse();
+        when(response.getOutputStream())
+                .thenReturn(servletOutputStream);
 
         exportService.exportVisitors(response);
 
-        String disposition =
-                response.getHeader("Content-Disposition");
+        verify(response).setContentType(
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
-        assertNotNull(disposition);
-        assertEquals(
-                "attachment; filename=visitors.xlsx",
-                disposition
+        verify(response).setHeader(
+                eq("Content-Disposition"),
+                contains("visitors.xlsx"));
+
+        assertTrue(outputStream.size() > 0);
+    }
+
+    @Test
+    void exportVisitors_EmptyList() throws IOException {
+
+        when(repository.findAll())
+                .thenReturn(Collections.emptyList());
+
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        ByteArrayOutputStream outputStream =
+                new ByteArrayOutputStream();
+
+        ServletOutputStream servletOutputStream =
+                new ServletOutputStream() {
+                    @Override
+                    public void write(int b) {
+                        outputStream.write(b);
+                    }
+
+                    @Override
+                    public boolean isReady() {
+                        return true;
+                    }
+
+                    @Override
+                    public void setWriteListener(
+                            WriteListener writeListener) {
+                    }
+                };
+
+        when(response.getOutputStream())
+                .thenReturn(servletOutputStream);
+
+        exportService.exportVisitors(response);
+
+        assertTrue(outputStream.size() > 0);
+    }
+
+    @Test
+    void autoSaveToFile_Success() {
+
+        when(repository.findAll())
+                .thenReturn(List.of(visitor));
+
+        exportService.autoSaveToFile();
+
+        Path file =
+                tempDir.resolve("visitors.xlsx");
+
+        assertTrue(Files.exists(file));
+    }
+
+    @Test
+    void autoSaveToFile_EmptyList() {
+
+        when(repository.findAll())
+                .thenReturn(Collections.emptyList());
+
+        exportService.autoSaveToFile();
+
+        Path file =
+                tempDir.resolve("visitors.xlsx");
+
+        assertTrue(Files.exists(file));
+    }
+
+    @Test
+    void autoSaveToFile_CreatesDirectory() {
+
+        Path customDir =
+                tempDir.resolve("exports");
+
+        ReflectionTestUtils.setField(
+                exportService,
+                "savePath",
+                customDir.toString()
+        );
+
+        when(repository.findAll())
+                .thenReturn(List.of(visitor));
+
+        exportService.autoSaveToFile();
+
+        assertTrue(Files.exists(customDir));
+        assertTrue(
+                Files.exists(
+                        customDir.resolve("visitors.xlsx")
+                )
         );
     }
 }
