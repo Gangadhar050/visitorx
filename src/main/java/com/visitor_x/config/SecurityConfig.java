@@ -1,8 +1,70 @@
-
+//
+//package com.visitor_x.config;
+//
+//import com.visitor_x.security.JwtAuthFilter;
+//import lombok.RequiredArgsConstructor;
+//import org.springframework.context.annotation.Bean;
+//import org.springframework.context.annotation.Configuration;
+//import org.springframework.security.authentication.AuthenticationManager;
+//import org.springframework.security.config.Customizer;
+//import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+//import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+//import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+//import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+//import org.springframework.security.config.http.SessionCreationPolicy;
+//import org.springframework.security.web.SecurityFilterChain;
+//import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+//
+//@Configuration
+//@EnableWebSecurity
+//@EnableMethodSecurity
+//
+//public class SecurityConfig {
+//
+////    private final JwtAuthFilter jwtAuthFilter;
+//
+//    // SecurityConfig.java
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+//                                                   JwtAuthFilter jwtAuthFilter) throws Exception { // ← inject here, not via field
+//        http
+//                .cors(Customizer.withDefaults())
+//                .csrf(csrf -> csrf.disable())
+//                .sessionManagement(session -> session
+//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers(
+//                                "/api/visitor/register",
+//                                "/swagger-ui/**",
+//                                "/api/auth/login",
+//                                "/v3/api-docs/**",
+//                                "/swagger-ui.html",
+//                                "/api/qr/generate-form",
+//                                "/error"
+//                        ).permitAll()
+//                        .requestMatchers(
+//                                "/api/visitor/{id}", // or keep it authenticated if only admins view
+//                                "/api/admin/**",
+//                                "/api/qr/generate",
+//                                  "/api/qr/save")
+//                        .hasRole("ADMIN")
+//                        .anyRequest().authenticated()
+//                )
+//                .addFilterBefore(jwtAuthFilter,
+//                        UsernamePasswordAuthenticationFilter.class);
+//
+//        return http.build();
+//    }
+//
+//    @Bean
+//    public AuthenticationManager authenticationManager(
+//            AuthenticationConfiguration config) throws Exception {
+//        return config.getAuthenticationManager();
+//    }
+//}
 package com.visitor_x.config;
 
 import com.visitor_x.security.JwtAuthFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,15 +80,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-
 public class SecurityConfig {
 
-//    private final JwtAuthFilter jwtAuthFilter;
-
-    // SecurityConfig.java
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   JwtAuthFilter jwtAuthFilter) throws Exception { // ← inject here, not via field
+                                                   JwtAuthFilter jwtAuthFilter) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
@@ -35,16 +93,19 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/visitor/register",
+                                "/api/qr/generate-form",   // public: visitor scans QR → gets form URL
                                 "/swagger-ui/**",
+                                "/api/auth/login",
                                 "/v3/api-docs/**",
+                                "/visitor-form.html",
                                 "/swagger-ui.html",
                                 "/error"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/admin/**",
-                                "/api/auth/login",
-                                "/api/qr/**")
-                        .hasRole("ADMIN")
+                                "/api/qr/generate",        // admin-only: generate QR image
+                                "/api/qr/save"             // admin-only: save QR to disk
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,

@@ -24,4 +24,8 @@ public class VisitorController {
                         .registerVisitor(request));
 
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<VisitorResponseDTO> getVisitor(@PathVariable Long id) {
+        return ResponseEntity.ok(visitorService.getVisitorById(id));
+    }
 }
