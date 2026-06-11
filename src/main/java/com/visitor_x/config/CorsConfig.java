@@ -20,7 +20,7 @@ public class CorsConfig {
                 "http://localhost:4200",   // Angular default
                 "http://localhost:5173",   // Vite default
                 "http://localhost:8080",   // Same origin
-                " https://visitorx-app-production.up.railway.app" // production
+                "https://visitorx-app-production.up.railway.app" // production
         ));
 
         config.setAllowedMethods(
