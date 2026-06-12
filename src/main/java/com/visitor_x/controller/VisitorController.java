@@ -10,9 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/visitors")
+@RequestMapping("/api/visitor")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class VisitorController {
 
     private final VisitorService visitorService; // ← use service, not repository
@@ -24,5 +23,9 @@ public class VisitorController {
                 .body(visitorService
                         .registerVisitor(request));
 
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<VisitorResponseDTO> getVisitor(@PathVariable Long id) {
+        return ResponseEntity.ok(visitorService.getVisitorById(id));
     }
 }

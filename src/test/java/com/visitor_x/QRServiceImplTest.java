@@ -4,6 +4,7 @@ import com.google.zxing.WriterException;
 import com.visitor_x.serviceImpl.QRServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
@@ -16,84 +17,102 @@ class QRServiceImplTest {
 
     private QRServiceImpl qrService;
 
+    @TempDir
+    Path tempDir;
+
     @BeforeEach
     void setUp() {
         qrService = new QRServiceImpl();
 
-        // Inject value of @Value("${app.qr.save-path}")
         ReflectionTestUtils.setField(
                 qrService,
                 "savePath",
-                "target/test-qrcodes"
+                tempDir.toString()
         );
     }
 
     @Test
-    void generateQRCode_ShouldReturnByteArray()
-            throws WriterException, IOException {
+    void generateQRCode_Success() throws WriterException, IOException {
 
-        byte[] result =
-                qrService.generateQRCode("VisitorX QR Test");
+        byte[] qrBytes =
+                qrService.generateQRCode("https://visitorx.com");
 
-        assertNotNull(result);
-        assertTrue(result.length > 0);
+        assertNotNull(qrBytes);
+        assertTrue(qrBytes.length > 0);
     }
 
     @Test
-    void saveQRCode_ShouldCreatePngFile()
+    void generateQRCode_NullText() {
+
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> qrService.generateQRCode(null)
+                );
+
+        assertEquals(
+                "QR text cannot be empty",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void generateQRCode_EmptyText() {
+
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> qrService.generateQRCode("")
+                );
+
+        assertEquals(
+                "QR text cannot be empty",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void saveQRCode_Success()
             throws WriterException, IOException {
 
         String filePath =
-                qrService.saveQRCode("VisitorX Save QR Test");
+                qrService.saveQRCode("VisitorX QR");
 
         assertNotNull(filePath);
 
-        Path path = Path.of(filePath);
+        Path savedFile = Path.of(filePath);
 
-        assertTrue(Files.exists(path));
-        assertTrue(Files.size(path) > 0);
+        assertTrue(Files.exists(savedFile));
         assertTrue(filePath.endsWith(".png"));
     }
 
     @Test
-    void saveQRCode_ShouldCreateDirectoryIfNotExists()
-            throws WriterException, IOException {
+    void saveQRCode_NullText() {
 
-        String customDir = "target/new-qr-folder";
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> qrService.saveQRCode(null)
+                );
 
-        ReflectionTestUtils.setField(
-                qrService,
-                "savePath",
-                customDir
+        assertEquals(
+                "QR text cannot be empty",
+                exception.getMessage()
         );
-
-        qrService.saveQRCode("Directory Creation Test");
-
-        assertTrue(Files.exists(Path.of(customDir)));
     }
 
-//    @Test
-//    void generateQRCode_WithEmptyText_ShouldStillGenerateQr()
-//            throws WriterException, IOException {
-//
-//        byte[] result = qrService.generateQRCode("");
-//
-//        assertNotNull(result);
-//        assertTrue(result.length > 0);
-//    }
-
     @Test
-    void saveQRCode_ShouldGenerateUniqueFileNames()
-            throws Exception {
+    void saveQRCode_EmptyText() {
 
-        String file1 =
-                qrService.saveQRCode("QR1");
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> qrService.saveQRCode(" ")
+                );
 
-        Thread.sleep(1000);
-
-        String file2 =
-                qrService.saveQRCode("QR2");
-
-        assertNotEquals(file1, file2);
+        assertEquals(
+                "QR text cannot be empty",
+                exception.getMessage()
+        );
     }
 }

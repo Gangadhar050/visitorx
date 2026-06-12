@@ -39,7 +39,7 @@ class ExportServiceImplTest {
                 .mobileNumber("9876543210")
                 .email("gangadhar@gmail.com")
                 .address("Bangalore")
-                .purposeOfVisit(String.valueOf(PurposeOfVisit.INTERVIEW))
+                .purposeOfVisit(PurposeOfVisit.INTERVIEW)
                 .visitDateTime(LocalDateTime.now())
                 .build();
     }

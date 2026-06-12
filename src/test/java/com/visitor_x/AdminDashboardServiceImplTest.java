@@ -44,7 +44,7 @@ class AdminDashboardServiceImplTest {
                 .email("gangadhar@gmail.com")
                 .mobileNumber("9876543210")
                 .address("Bangalore")
-                .purposeOfVisit(String.valueOf(PurposeOfVisit.INTERVIEW))
+                .purposeOfVisit(PurposeOfVisit.INTERVIEW)
                 .photoUrl("photo.jpg")
                 .visitDateTime(LocalDateTime.now())
                 .build();

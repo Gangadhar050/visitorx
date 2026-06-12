@@ -7,4 +7,6 @@ import com.visitor_x.entity.Visitor;
 public interface VisitorService {
 
     VisitorResponseDTO registerVisitor(VisitorRequestDTO request);
+
+    VisitorResponseDTO getVisitorById(Long visitorId);
 }

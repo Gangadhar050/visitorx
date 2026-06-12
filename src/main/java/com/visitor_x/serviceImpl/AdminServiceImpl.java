@@ -2,6 +2,7 @@ package com.visitor_x.serviceImpl;
 
 import com.visitor_x.dto.AdminRequestDTO;
 import com.visitor_x.dto.AdminResponseDTO;
+import com.visitor_x.dto.ChangePasswordRequestDTO;
 import com.visitor_x.entity.Admin;
 import com.visitor_x.exception.DuplicateResourceException;
 import com.visitor_x.exception.ResourceNotFoundException;
@@ -60,7 +61,24 @@ public class AdminServiceImpl implements AdminService {
             throw new ResourceNotFoundException(
                     "Admin not found with id: " + id);
         }
+        if (adminRepository.count() == 1) {
+            throw new IllegalStateException(
+                    "Cannot delete the last admin");
+        }
+
         adminRepository.deleteById(id);
+    }
+    @Override
+    public void changePassword(String username, ChangePasswordRequestDTO request) {
+        Admin admin = adminRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin not found"));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), admin.getPassword())) {
+            throw new IllegalArgumentException("Old password is incorrect");
+        }
+
+        admin.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        adminRepository.save(admin);
     }
 
     private AdminResponseDTO toDTO(Admin admin) {

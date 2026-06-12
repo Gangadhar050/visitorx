@@ -2,10 +2,11 @@
 package com.visitor_x.config;
 
 import com.visitor_x.security.JwtAuthFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,31 +18,36 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-
 public class SecurityConfig {
 
-//    private final JwtAuthFilter jwtAuthFilter;
-
-    // SecurityConfig.java
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   JwtAuthFilter jwtAuthFilter) throws Exception { // ← inject here, not via field
+                                                   JwtAuthFilter jwtAuthFilter) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Allow all preflight requests
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // Explicitly allow visitor registration POST from frontend
+                        .requestMatchers(HttpMethod.POST, "/api/visitor/register").permitAll()
                         .requestMatchers(
-                                "/api/visitors/register",
+                                "/api/visitor/register",
+                                "/api/qr/generate-form",   // public: visitor scans QR → gets form URL
                                 "/swagger-ui/**",
+                                "/api/auth/login",
                                 "/v3/api-docs/**",
-                                "/swagger-ui.html"
+                                "/visitor-form.html",
+                                "/swagger-ui.html",
+                                "/error"
                         ).permitAll()
                         .requestMatchers(
                                 "/api/admin/**",
-                                "/api/auth/login",
-                                "/api/qr/**")
-                        .hasRole("ADMIN")
+                                "/api/qr/generate",        // admin-only: generate QR image
+                                "/api/qr/save"             // admin-only: save QR to disk
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,
