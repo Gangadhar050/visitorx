@@ -39,6 +39,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/api/auth/login",
                                 "/v3/api-docs/**",
+                                "/https://visitorx-app-production.up.railway.app/register",
                                 "/visitor-form.html",
                                 "/swagger-ui.html",
                                 "/error"
