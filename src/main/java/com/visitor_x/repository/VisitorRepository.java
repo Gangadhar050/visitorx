@@ -8,7 +8,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +32,4 @@ public interface VisitorRepository extends JpaRepository<Visitor, Long> {
     // Today's visitors list
     List<Visitor> findByVisitDateTimeBetween(
             LocalDateTime start, LocalDateTime end);
-//
-//    Collection<Object> findByNameContainingIgnoreCase(String keyword);
 }

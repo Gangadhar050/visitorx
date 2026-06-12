@@ -115,14 +115,17 @@ public class AdminDashboardServiceImpl
     }
 
     private VisitorResponseDTO toDTO(Visitor v) {
+        String photoBase64 = null;
+        if (v.getPhoto() != null && v.getPhoto().length > 0) {
+            photoBase64 = "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(v.getPhoto());
+        }
         return VisitorResponseDTO.builder()
                 .visitorId(v.getVisitorId())
                 .name(v.getName())
                 .email(v.getEmail())
                 .mobileNumber(v.getMobileNumber())
-                .address(v.getAddress())
                 .purposeOfVisit(v.getPurposeOfVisit())
-                .photoUrl(v.getPhotoUrl())
+                .photoBase64(photoBase64)
                 .visitDateTime(v.getVisitDateTime())
                 .build();
     }
