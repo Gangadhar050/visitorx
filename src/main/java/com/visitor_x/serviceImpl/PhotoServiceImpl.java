@@ -1,5 +1,6 @@
 package com.visitor_x.serviceImpl;
 
+
 import com.visitor_x.service.PhotoService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,12 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,20 +30,19 @@ public class PhotoServiceImpl implements PhotoService {
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
     @Override
-    public byte[] convertToJpg(MultipartFile file) {
+    public byte[] convertBase64ToJpg(String photoBase64) {
         try {
-            if (!isValidImage(file)) {
-                throw new IllegalArgumentException("Invalid image file. Please upload a valid image (JPG, PNG, GIF, etc.)");
+            String base64Data = photoBase64;
+
+            if (photoBase64.contains(",")) {
+                base64Data = photoBase64.substring(photoBase64.indexOf(",") + 1);
             }
 
-            if (file.getSize() > MAX_FILE_SIZE) {
-                throw new IllegalArgumentException("File size exceeds maximum limit of 5MB");
-            }
+            byte[] imageBytes = Base64.getDecoder().decode(base64Data);
 
-            BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-
+            BufferedImage bufferedImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
             if (bufferedImage == null) {
-                throw new IllegalArgumentException("Unable to read image file");
+                throw new IllegalArgumentException("Invalid image data");
             }
 
             BufferedImage jpgImage = new BufferedImage(
@@ -50,7 +51,6 @@ public class PhotoServiceImpl implements PhotoService {
                     BufferedImage.TYPE_INT_RGB
             );
 
-            // Fill white background to avoid black areas for transparent PNG/GIF/WebP
             Graphics2D g = jpgImage.createGraphics();
             g.setColor(Color.WHITE);
             g.fillRect(0, 0, jpgImage.getWidth(), jpgImage.getHeight());
@@ -63,26 +63,20 @@ public class PhotoServiceImpl implements PhotoService {
                 throw new IOException("No suitable JPG writer found");
             }
 
-            log.info("Image successfully converted to JPG format. Size: {} bytes", jpgOutput.size());
             return jpgOutput.toByteArray();
 
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid Base64 image data");
         } catch (IOException e) {
-            log.error("Error converting image to JPG format", e);
             throw new RuntimeException("Failed to process image: " + e.getMessage(), e);
         }
     }
 
     @Override
     public boolean isValidImage(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            return false;
-        }
-
+        if (file == null || file.isEmpty()) return false;
         String contentType = file.getContentType();
-        if (contentType == null) {
-            return false;
-        }
-
+        if (contentType == null) return false;
         return ALLOWED_MIME_TYPES.contains(contentType.toLowerCase());
     }
 }

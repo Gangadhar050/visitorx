@@ -54,7 +54,7 @@ public class AdminDashboardController {
     }
 
     @GetMapping("/visitors/{id}")
-    public ResponseEntity<VisitorResponseDTO> getVisitor(
+    public ResponseEntity<VisitorResponseDTO> getVisitorById(
             @PathVariable Long id) {
         return ResponseEntity.ok(dashboardService.getVisitor(id));
     }

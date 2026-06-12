@@ -27,5 +27,5 @@ public class VisitorRequestDTO {
     private String email;
 
     private PurposeOfVisit purposeOfVisit;
-    private MultipartFile photo;
+    private String photoBase64;
 }

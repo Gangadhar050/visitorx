@@ -5,17 +5,17 @@ import org.springframework.web.multipart.MultipartFile;
 public interface PhotoService {
 
     /**
-     * Convert uploaded image to JPG format
-     * @param file The image file to convert
-     * @return byte array of JPG image
+     * Convert a base64 encoded string to a byte array representing a JPG image
+     * @param photoBase64 The base64 encoded string of the photo
+     * @return byte array of the JPG image
      */
-    byte[] convertToJpg(MultipartFile file);
-
+    byte[] convertBase64ToJpg(String photoBase64);
     /**
      * Validate if the uploaded file is a valid image
      * @param file The file to validate
      * @return true if valid image, false otherwise
      */
     boolean isValidImage(MultipartFile file);
+
 }
 
