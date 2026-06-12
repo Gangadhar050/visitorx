@@ -247,8 +247,8 @@ class AdminDashboardServiceImplTest {
                 .email("gangadhar@gmail.com")
                 .mobileNumber("9876543210")
                 .address("Bangalore")
-                .purposeOfVisit("Meeting")
-                .photoUrl("photo.jpg")
+                .purposeOfVisit(com.visitor_x.enums.PurposeOfVisit.INTERVIEW)
+                .photo("test photo data".getBytes())
                 .visitDateTime(LocalDateTime.now())
                 .build();
     }

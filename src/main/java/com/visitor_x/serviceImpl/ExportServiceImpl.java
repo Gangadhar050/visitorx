@@ -82,7 +82,7 @@ public class ExportServiceImpl implements ExportService {
 
         String[] columns = {
                 "ID", "Name", "Mobile", "Email",
-                "Purpose", "Address", "Visit Time","PhotoURL"
+                "Purpose","Visit Time","Photo Stored"
         };
 
         Row header = sheet.createRow(0);
@@ -105,14 +105,12 @@ public class ExportServiceImpl implements ExportService {
                     v.getEmail() != null ? v.getEmail() : "");
             row.createCell(4).setCellValue(
                     v.getPurposeOfVisit() != null
-                            ? v.getPurposeOfVisit() : ""); // ← .name()
+                            ? v.getPurposeOfVisit().name() : ""); // ← .name()
             row.createCell(5).setCellValue(
-                    v.getAddress() != null ? v.getAddress() : "");
-            row.createCell(6).setCellValue(
                     v.getVisitDateTime() != null
                             ? v.getVisitDateTime().toString() : "");
-            row.createCell(7).setCellValue(v.getPhotoUrl() != null
-                    ? v.getPhotoUrl() : "");
+            row.createCell(6).setCellValue(v.getPhoto() != null && v.getPhoto().length > 0
+                    ? "Yes" : "No");
 
         }
 

@@ -1,9 +1,10 @@
 package com.visitor_x.dto;
 
-import jakarta.validation.constraints.Email;
+import com.visitor_x.enums.PurposeOfVisit;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 public class VisitorRequestDTO {
@@ -25,7 +26,6 @@ public class VisitorRequestDTO {
     )
     private String email;
 
-    private String address;
-    private String purposeOfVisit;
-    private String photoUrl;
+    private PurposeOfVisit purposeOfVisit;
+    private MultipartFile photo;
 }
