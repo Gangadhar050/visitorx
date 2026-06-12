@@ -31,6 +31,7 @@ public class QRServiceImpl implements QRService {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
         return outputStream.toByteArray();
+
     }
 
     @Override
