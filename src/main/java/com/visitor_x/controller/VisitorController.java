@@ -19,13 +19,9 @@ public class VisitorController {
 
     private final VisitorService visitorService;
 
-//    @PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<VisitorResponseDTO> registerVisitorWithPhoto(
-//            @Valid @ModelAttribute VisitorRequestDTO request) {
-//        return ResponseEntity.ok(visitorService.registerVisitorWithPhoto(request));
-//    }
-
-    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/register",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<VisitorResponseDTO> registerVisitorWithPhoto(
             @Valid @RequestBody VisitorRequestDTO request) {
         return ResponseEntity.ok(visitorService.registerVisitorWithPhoto(request));
