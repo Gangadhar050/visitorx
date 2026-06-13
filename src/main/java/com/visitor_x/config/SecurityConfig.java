@@ -33,8 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Explicitly allow visitor registration POST from frontend
                         .requestMatchers(HttpMethod.POST, "/api/visitor/register").permitAll()
-                        .requestMatchers(
-                                "/api/visitor/register",
+                        .requestMatchers("/api/visitor/register",
                                 "/api/qr/generate-form",   // public: visitor scans QR → gets form URL
                                 "/swagger-ui/**",
                                 "/api/auth/login",
@@ -46,7 +45,8 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers(
                                 "/api/admin/**",
-                                "/api/qr/generate",        // admin-only: generate QR image
+                                "/api/qr/generate",
+                                "/api/photos/**",// admin-only: generate QR image
                                 "/api/qr/save"             // admin-only: save QR to disk
                         ).hasRole("ADMIN")
                         .anyRequest().authenticated()

@@ -34,7 +34,7 @@ public class Visitor {
 
     //ai
     @Lob
-    @Column(columnDefinition = "LONGBLOB", nullable = false)
+    @Column(columnDefinition = "LONGBLOB")
     private byte[] photo;
 
     @CreationTimestamp

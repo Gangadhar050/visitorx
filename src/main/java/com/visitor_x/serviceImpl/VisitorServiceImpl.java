@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.Base64;
 
 @Service
@@ -70,17 +71,18 @@ public class VisitorServiceImpl implements VisitorService {
         return toDTO(visitor);
     }
 
-    @Override
-    @Transactional
-    public VisitorResponseDTO registerVisitor(VisitorRequestDTO request) {
-        // existing implementation, unchanged
-        return null; // keep your existing logic here
-    }
 
+    // ADD THIS METHOD HERE
     private VisitorResponseDTO toDTO(Visitor visitor) {
+
         String photoBase64 = null;
-        if (visitor.getPhoto() != null && visitor.getPhoto().length > 0) {
-            photoBase64 = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(visitor.getPhoto());
+
+        if (visitor.getPhoto() != null &&
+                visitor.getPhoto().length > 0) {
+
+            photoBase64 = "data:image/jpeg;base64," +
+                    Base64.getEncoder()
+                            .encodeToString(visitor.getPhoto());
         }
 
         return VisitorResponseDTO.builder()

@@ -35,7 +35,7 @@ class QRServiceImplTest {
     void generateQRCode_Success() throws WriterException, IOException {
 
         byte[] qrBytes =
-                qrService.generateQRCode("https://visitorx.com");
+                qrService.generateQRCode("VisitorX Test");
 
         assertNotNull(qrBytes);
         assertTrue(qrBytes.length > 0);
@@ -72,8 +72,22 @@ class QRServiceImplTest {
     }
 
     @Test
-    void saveQRCode_Success()
-            throws WriterException, IOException {
+    void generateQRCode_BlankText() {
+
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> qrService.generateQRCode("   ")
+                );
+
+        assertEquals(
+                "QR text cannot be empty",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void saveQRCode_Success() throws WriterException, IOException {
 
         String filePath =
                 qrService.saveQRCode("VisitorX QR");
@@ -83,6 +97,7 @@ class QRServiceImplTest {
         Path savedFile = Path.of(filePath);
 
         assertTrue(Files.exists(savedFile));
+        assertTrue(Files.size(savedFile) > 0);
         assertTrue(filePath.endsWith(".png"));
     }
 
@@ -107,12 +122,46 @@ class QRServiceImplTest {
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> qrService.saveQRCode(" ")
+                        () -> qrService.saveQRCode("")
                 );
 
         assertEquals(
                 "QR text cannot be empty",
                 exception.getMessage()
         );
+    }
+
+    @Test
+    void saveQRCode_BlankText() {
+
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> qrService.saveQRCode("   ")
+                );
+
+        assertEquals(
+                "QR text cannot be empty",
+                exception.getMessage()
+        );
+    }
+
+    @Test
+    void saveQRCode_CreatesDirectoryIfNotExists()
+            throws WriterException, IOException {
+
+        Path newDir = tempDir.resolve("qr-images");
+
+        ReflectionTestUtils.setField(
+                qrService,
+                "savePath",
+                newDir.toString()
+        );
+
+        String filePath =
+                qrService.saveQRCode("Directory Test");
+
+        assertTrue(Files.exists(newDir));
+        assertTrue(Files.exists(Path.of(filePath)));
     }
 }
