@@ -18,7 +18,6 @@ import javax.xml.validation.Schema;
 ))
 
 
-
 public class SwaggerSecurityConfig {
 
     @Bean
