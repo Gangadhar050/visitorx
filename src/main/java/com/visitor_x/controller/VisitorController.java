@@ -22,9 +22,9 @@ public class VisitorController {
     @PostMapping(value = "/register",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<VisitorResponseDTO> registerVisitorWithPhoto(
+    public ResponseEntity<String> registerVisitorWithPhoto(
             @Valid @RequestBody VisitorRequestDTO request) {
-        return ResponseEntity.ok(visitorService.registerVisitorWithPhoto(request));
+        return ResponseEntity.ok("Visitor Registered Successfully");
     }
 
 }

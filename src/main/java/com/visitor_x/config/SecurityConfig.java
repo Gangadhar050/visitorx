@@ -41,8 +41,7 @@ public class SecurityConfig {
                                 "/https://visitorx-app-production.up.railway.app/register",
                                 "/visitor-form.html",
                                 "/swagger-ui.html",
-                                "/error"
-                        ).permitAll()
+                                "/error").permitAll()
                         .requestMatchers(
                                 "/api/admin/**",
                                 "/api/qr/generate",
