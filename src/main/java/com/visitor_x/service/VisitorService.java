@@ -10,10 +10,5 @@ public interface VisitorService {
 
     VisitorResponseDTO getVisitorById(Long visitorId);
 
-    /**
-     * Register visitor with photo upload
-     * @param request VisitorRequestDTO containing visitor details and photo file
-     * @return VisitorResponseDTO with visitor details and photo in base64
-     */
     VisitorResponseDTO registerVisitorWithPhoto(VisitorRequestDTO request);
 }
