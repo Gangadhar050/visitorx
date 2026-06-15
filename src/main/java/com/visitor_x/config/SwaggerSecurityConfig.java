@@ -12,7 +12,7 @@ import javax.xml.validation.Schema;
 
 @Configuration
 @OpenAPIDefinition(info = @io.swagger.v3.oas.annotations.info.Info(
-        title = "VisitorX API",
+        title = "VisitorX – Smart Visitor Registration System",
         version = "1.0",
         description = "API documentation for VisitorX application"
 ))
