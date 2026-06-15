@@ -43,7 +43,7 @@ class AdminDashboardServiceImplTest {
                 .name("Gangadhar")
                 .email("gangadhar@gmail.com")
                 .mobileNumber("9876543210")
-                .purposeOfVisit(PurposeOfVisit.MEETING)
+                .purposeOfVisit(PurposeOfVisit.INTERVIEW)
                 .visitDateTime(LocalDateTime.now())
                 .photo("photo".getBytes())
                 .build();
