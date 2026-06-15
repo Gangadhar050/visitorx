@@ -22,10 +22,9 @@ public class AdminController {
     private final AdminService adminService;
 
     @PostMapping("/create")
-    public ResponseEntity<AdminResponseDTO> createAdmin(
+    public ResponseEntity<String> createAdmin(
             @Valid @RequestBody AdminRequestDTO request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(adminService.createAdmin(request));
+        return ResponseEntity.ok("Admin Created Successfully");
     }
 
     @GetMapping("/{id}")

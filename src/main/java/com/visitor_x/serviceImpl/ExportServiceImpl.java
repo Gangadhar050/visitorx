@@ -5,6 +5,7 @@ import com.visitor_x.repository.VisitorRepository;
 import com.visitor_x.service.ExportService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,9 @@ public class ExportServiceImpl implements ExportService {
 
     @Value("${app.export.save-path:exports/}")
     private String savePath;
+
+    @Value("${app.base-url:http://localhost:8080}")
+    private String baseUrl;
 
     // ── Download via Postman / browser ──────────────────────────
     @Override
@@ -82,7 +86,7 @@ public class ExportServiceImpl implements ExportService {
 
         String[] columns = {
                 "ID", "Name", "Mobile", "Email",
-                "Purpose","Visit Time","Photo Stored"
+                "Purpose","Visit Time","Photo Link"
         };
 
         Row header = sheet.createRow(0);
@@ -93,27 +97,59 @@ public class ExportServiceImpl implements ExportService {
         }
 
         int rowNum = 1;
+
+        // Hyperlink style: blue + underline
+        CellStyle linkStyle = workbook.createCellStyle();
+        Font linkFont = workbook.createFont();
+        linkFont.setUnderline(Font.U_SINGLE);
+        linkFont.setColor(IndexedColors.BLUE.getIndex());
+        linkStyle.setFont(linkFont);
+
+        CreationHelper helper = workbook.getCreationHelper();
+
         for (Visitor v : visitors) {
-            Row row = sheet.createRow(rowNum++);
+
+            Row row = sheet.createRow(rowNum);
+
             row.createCell(0).setCellValue(
                     v.getVisitorId() != null ? v.getVisitorId() : 0L);
+
             row.createCell(1).setCellValue(
                     v.getName() != null ? v.getName() : "");
+
             row.createCell(2).setCellValue(
                     v.getMobileNumber() != null ? v.getMobileNumber() : "");
+
             row.createCell(3).setCellValue(
                     v.getEmail() != null ? v.getEmail() : "");
+
             row.createCell(4).setCellValue(
                     v.getPurposeOfVisit() != null
-                            ? v.getPurposeOfVisit().name() : ""); // ← .name()
+                            ? v.getPurposeOfVisit().name()
+                            : "");
+
             row.createCell(5).setCellValue(
                     v.getVisitDateTime() != null
-                            ? v.getVisitDateTime().toString() : "");
-            row.createCell(6).setCellValue(v.getPhoto() != null && v.getPhoto().length > 0
-                    ? "Yes" : "No");
+                            ? v.getVisitDateTime().toString()
+                            : "");
 
+            Cell photoCell = row.createCell(6);
+            if (v.getPhoto() != null && v.getPhoto().length > 0 && v.getVisitorId() != null) {
+
+                String photoUrl = baseUrl + "/api/photos/" + v.getVisitorId();
+
+                Hyperlink link = helper.createHyperlink(HyperlinkType.URL);
+                link.setAddress(photoUrl);
+
+                photoCell.setCellValue("View Photo");
+                photoCell.setHyperlink(link);
+                photoCell.setCellStyle(linkStyle);
+            } else {
+                photoCell.setCellValue("No Photo");
+            }
+
+            rowNum++;
         }
-
         for (int i = 0; i < columns.length; i++) {
             sheet.autoSizeColumn(i);
         }

@@ -41,4 +41,17 @@ public class AuthController {
 
         return ResponseEntity.ok(Map.of("token", token));
     }
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout() {
+        return ResponseEntity.ok(
+                Map.of("message", "Logged out successfully")
+        );
+    }
+    @GetMapping("/test")
+    public ResponseEntity<Map<String, String>> apitest() {
+        return ResponseEntity.ok(
+                Map.of("message", "API is Running successfully")
+        );
+    }
+
 }

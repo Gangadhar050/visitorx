@@ -15,6 +15,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -114,10 +115,16 @@ public class AdminDashboardServiceImpl
         visitorRepository.deleteById(id);
     }
 
+
     private VisitorResponseDTO toDTO(Visitor v) {
         String photoBase64 = null;
-        if (v.getPhoto() != null && v.getPhoto().length > 0) {
-            photoBase64 = "data:image/jpeg;base64," + java.util.Base64.getEncoder().encodeToString(v.getPhoto());
+
+        if (v.getPhoto() != null &&
+                v.getPhoto().length > 0) {
+
+            photoBase64 = "data:image/jpeg;base64," +
+                    Base64.getEncoder()
+                            .encodeToString(v.getPhoto());
         }
         return VisitorResponseDTO.builder()
                 .visitorId(v.getVisitorId())

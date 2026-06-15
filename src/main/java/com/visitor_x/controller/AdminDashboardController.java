@@ -65,4 +65,5 @@ public class AdminDashboardController {
         dashboardService.deleteVisitor(id);
         return ResponseEntity.noContent().build();
     }
+
 }
