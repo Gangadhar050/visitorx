@@ -7,7 +7,7 @@ public enum PurposeOfVisit {
 
     INTERVIEW("Interview"),
     INTERNSHIP("Internship"),
-    FULL_TIME_EMPLOYEE("Full_Time_Employment");
+    FULL_TIME_EMPLOYEE("Full_Time_Employee");
 
     private final String label;
 
