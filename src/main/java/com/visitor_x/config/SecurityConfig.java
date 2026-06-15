@@ -36,9 +36,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/visitor/register",
                                 "/api/qr/generate-form",   // public: visitor scans QR → gets form URL
                                 "/swagger-ui/**",
-                                "/api/auth/login",
+                                "/api/auth/**",
+//                                "/api/auth/test",
                                 "/v3/api-docs/**",
                                 "/https://visitorx-app-production.up.railway.app/register",
+//                                "/register",
                                 "/visitor-form.html",
                                 "/swagger-ui.html",
                                 "/error").permitAll()
