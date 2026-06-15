@@ -10,5 +10,6 @@ public interface VisitorService {
 
     VisitorResponseDTO getVisitorById(Long visitorId);
 
+
     VisitorResponseDTO registerVisitorWithPhoto(VisitorRequestDTO request);
 }

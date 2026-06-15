@@ -59,7 +59,7 @@ class ExportServiceImplTest {
                 .name("Gangadhar")
                 .mobileNumber("9876543210")
                 .email("gangadhar@gmail.com")
-                .purposeOfVisit(PurposeOfVisit.MEETING)
+                .purposeOfVisit(PurposeOfVisit.INTERVIEW)
                 .visitDateTime(LocalDateTime.now())
                 .photo("photo".getBytes())
                 .build();

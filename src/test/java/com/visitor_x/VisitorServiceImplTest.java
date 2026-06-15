@@ -47,7 +47,7 @@ class VisitorServiceImplTest {
         requestDTO.setName("John Doe");
         requestDTO.setEmail("john@gmail.com");
         requestDTO.setMobileNumber("9876543210");
-        requestDTO.setPurposeOfVisit(PurposeOfVisit.MEETING);
+        requestDTO.setPurposeOfVisit(PurposeOfVisit.INTERVIEW);
         requestDTO.setPhotoBase64("base64Photo");
 
         visitor = Visitor.builder()
@@ -55,7 +55,7 @@ class VisitorServiceImplTest {
                 .name("John Doe")
                 .email("john@gmail.com")
                 .mobileNumber("9876543210")
-                .purposeOfVisit(PurposeOfVisit.MEETING)
+                .purposeOfVisit(PurposeOfVisit.INTERVIEW)
                 .photo("photo".getBytes())
                 .visitDateTime(LocalDateTime.now())
                 .build();
