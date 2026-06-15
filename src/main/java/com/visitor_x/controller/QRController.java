@@ -22,15 +22,20 @@ public class QRController {
 
     @Value("${app.visitor.form-url}")
     private String visitorFormUrl;
-    @PreAuthorize("hasAuthority('ADMIN')")
+
+    /**
+     * Admin: download QR code as PNG image.
+     * Print or display this QR — visitors scan it to open the registration form.
+     */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/generate", produces = MediaType.IMAGE_PNG_VALUE)
-    public ResponseEntity<byte[]> generateQR() throws Exception {
-        byte[] qrImage = qrService.generateQRCode(visitorFormUrl);
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG)
-                .body(qrImage);
+    public ResponseEntity<byte[]> generateQR() throws WriterException, IOException {
+        return ResponseEntity.ok(qrService.generateQRCode(visitorFormUrl));
     }
 
+    /**
+     * Admin: save QR code PNG to server disk, returns the saved file path.
+     */
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/save")
     public ResponseEntity<Map<String, String>> saveQR() throws WriterException, IOException {

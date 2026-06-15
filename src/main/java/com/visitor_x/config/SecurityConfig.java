@@ -47,7 +47,7 @@ public class SecurityConfig {
                                 "/api/qr/generate",
                                 "/api/photos/**",// admin-only: generate QR image
                                 "/api/qr/save"             // admin-only: save QR to disk
-                        ).hasAuthority("ADMIN")
+                        ).hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,
