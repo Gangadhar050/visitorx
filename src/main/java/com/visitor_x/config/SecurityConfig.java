@@ -37,10 +37,8 @@ public class SecurityConfig {
                                 "/api/qr/generate-form",   // public: visitor scans QR → gets form URL
                                 "/swagger-ui/**",
                                 "/api/auth/**",
-//                                "/api/auth/test",
                                 "/v3/api-docs/**",
-                                "/https://visitorx-app-production.up.railway.app/register",
-//                                "/register",
+                                "/register",
                                 "/visitor-form.html",
                                 "/swagger-ui.html",
                                 "/error").permitAll()
@@ -49,7 +47,7 @@ public class SecurityConfig {
                                 "/api/qr/generate",
                                 "/api/photos/**",// admin-only: generate QR image
                                 "/api/qr/save"             // admin-only: save QR to disk
-                        ).hasRole("ADMIN")
+                        ).hasAuthority("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter,

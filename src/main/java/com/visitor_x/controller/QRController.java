@@ -22,14 +22,10 @@ public class QRController {
 
     @Value("${app.visitor.form-url}")
     private String visitorFormUrl;
-
-
-   @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping(value = "/generate", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> generateQR() throws Exception {
-        String registrationUrl = "https://visitorx-app-production.up.railway.app/register";
-        byte[] qrImage = qrService.generateQRCode(registrationUrl);
-
+        byte[] qrImage = qrService.generateQRCode(visitorFormUrl);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .body(qrImage);
