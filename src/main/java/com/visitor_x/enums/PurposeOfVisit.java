@@ -28,13 +28,15 @@ public enum PurposeOfVisit {
             return null;
         }
 
-        String normalizedValue = value.trim();
+        String normalizedValue = value.trim()
+                .replace(" ", "_")
+                .toUpperCase();
 
         for (PurposeOfVisit purpose : PurposeOfVisit.values()) {
-            if (
-                    purpose.name().equalsIgnoreCase(normalizedValue)
-                            || purpose.label.equalsIgnoreCase(normalizedValue)
-            ) {
+            if (purpose.name().equals(normalizedValue)) {
+                return purpose;
+            }
+            if (purpose.label.equalsIgnoreCase(value.trim())) {
                 return purpose;
             }
         }
