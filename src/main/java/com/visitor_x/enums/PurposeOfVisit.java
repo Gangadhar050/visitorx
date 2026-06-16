@@ -9,7 +9,7 @@ public enum PurposeOfVisit {
     MEETING("Meeting"),
     INTERVIEW("Interview"),
     INTERNSHIP("Internship"),
-    FULL_TIME_EMPLOYEE("Full_Time_Employement");
+    FULL_TIME_EMPLOYMENT("Full Time Employment");
 
     private final String label;
 
@@ -24,12 +24,21 @@ public enum PurposeOfVisit {
 
     @JsonCreator
     public static PurposeOfVisit fromValue(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+
+        String normalizedValue = value.trim();
+
         for (PurposeOfVisit purpose : PurposeOfVisit.values()) {
-            if (purpose.name().equalsIgnoreCase(value) ||
-                    purpose.label.equalsIgnoreCase(value)) {
+            if (
+                    purpose.name().equalsIgnoreCase(normalizedValue)
+                            || purpose.label.equalsIgnoreCase(normalizedValue)
+            ) {
                 return purpose;
             }
         }
-        throw new IllegalArgumentException("Invalid purpose of visit: " + value);
+
+        throw new IllegalArgumentException("Invalid purposeOfVisit: " + value);
     }
 }
