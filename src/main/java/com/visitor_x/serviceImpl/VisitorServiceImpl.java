@@ -48,6 +48,7 @@ public class VisitorServiceImpl implements VisitorService {
         visitorRepository.findByMobileNumber(request.getMobileNumber())
                 .ifPresent(v -> { throw new DuplicateResourceException("Mobile number already registered"); });
 
+        System.out.println(">>> CHECKPOINT photoBase64 length BEFORE CALL = " + request.getPhotoBase64().length());
         byte[] jpgPhotoData = photoService.convertBase64ToJpg(request.getPhotoBase64());
 
         Visitor visitor = Visitor.builder()
