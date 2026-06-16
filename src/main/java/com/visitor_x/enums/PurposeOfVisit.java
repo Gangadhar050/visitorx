@@ -1,6 +1,5 @@
 package com.visitor_x.enums;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -28,17 +27,13 @@ public enum PurposeOfVisit {
             return null;
         }
 
-        String trimmedValue = value.trim();
+        String raw = value.trim();
+        String normalized = raw.replace(" ", "_").toUpperCase();
 
-        // Try matching by enum name first (e.g., "INTERVIEW")
-        try {
-            return PurposeOfVisit.valueOf(trimmedValue.toUpperCase().replace(" ", "_"));
-        } catch (IllegalArgumentException e) {
-            // If not found by name, try matching by label
-            for (PurposeOfVisit purpose : PurposeOfVisit.values()) {
-                if (purpose.label.equalsIgnoreCase(trimmedValue)) {
-                    return purpose;
-                }
+        for (PurposeOfVisit purpose : values()) {
+            if (purpose.name().equals(normalized)
+                    || purpose.label.equalsIgnoreCase(raw)) {
+                return purpose;
             }
         }
 
