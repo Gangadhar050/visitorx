@@ -19,12 +19,24 @@ public class VisitorController {
 
     private final VisitorService visitorService;
 
-    @PostMapping(value = "/register",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> registerVisitorWithPhoto(
+    @PostMapping("/register")
+    public ResponseEntity<?> registerVisitorWithPhoto(
             @Valid @RequestBody VisitorRequestDTO request) {
-        return ResponseEntity.ok("Visitor Registered Successfully");
-    }
 
+        System.out.println("Name = " + request.getName());
+        System.out.println("Email = " + request.getEmail());
+        System.out.println("Mobile = " + request.getMobileNumber());
+        System.out.println("Purpose = " + request.getPurposeOfVisit());
+
+        if (request.getPhotoBase64() != null) {
+            System.out.println(
+                    "Photo Length = " +
+                            request.getPhotoBase64().length()
+            );
+        }
+
+        return ResponseEntity.ok(
+                visitorService.registerVisitorWithPhoto(request)
+        );
+    }
 }

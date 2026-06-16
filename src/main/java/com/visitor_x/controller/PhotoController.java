@@ -1,24 +1,33 @@
 package com.visitor_x.controller;
 
+import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.exception.ResourceNotFoundException;
 import com.visitor_x.repository.VisitorRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/photos")
 @RequiredArgsConstructor
 public class PhotoController {
 
     private final VisitorRepository visitorRepository;
+
+//    @PostMapping("/capture")
+//    public ResponseEntity<?> saveVisitor(
+//            @RequestBody VisitorRequestDTO request) {
+//
+//        log.info("REQUEST RECEIVED = {}", request);
+//
+//        return ResponseEntity.ok().build();
+//    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

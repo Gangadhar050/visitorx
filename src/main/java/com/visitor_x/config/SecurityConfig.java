@@ -39,6 +39,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/v3/api-docs/**",
                                 "/register",
+                                "/api/photos/capture",
                                 "/visitor-form.html",
                                 "/swagger-ui.html",
                                 "/error").permitAll()
