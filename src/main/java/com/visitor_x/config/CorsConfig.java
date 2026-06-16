@@ -19,7 +19,8 @@ public class CorsConfig {
                 "http://localhost:3000",   // React default
                 "http://localhost:4200",   // Angular default
                 "http://localhost:5173",   // Vite default
-                "http://localhost:8080",   // Same origin
+                "http://localhost:8080",
+                "https://visitorx-new.web.app/",   // Same origin
                 "https://visitorx-app-production.up.railway.app" // production
         ));
 
