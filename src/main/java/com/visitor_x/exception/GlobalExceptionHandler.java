@@ -1,5 +1,6 @@
 package com.visitor_x.exception;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -44,8 +46,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<Map<String, String>> handleBadJson(HttpMessageNotReadableException ex) {
-        return ResponseEntity.badRequest().body(Map.of("error", "Invalid request body or enum value"));
+    public ResponseEntity<?> handle(HttpMessageNotReadableException ex) {
+
+        log.error("JSON ERROR", ex);
+
+        return ResponseEntity.badRequest()
+                .body(Map.of(
+                        "error",
+                        ex.getMostSpecificCause().getMessage()
+                ));
     }
 
     private ResponseEntity<Object> buildResponse(HttpStatus status, String message) {
