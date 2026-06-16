@@ -22,22 +22,23 @@ public enum PurposeOfVisit {
         return label;
     }
 
-    @JsonCreator
+    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static PurposeOfVisit fromValue(String value) {
         if (value == null || value.trim().isEmpty()) {
             return null;
         }
 
-        String normalizedValue = value.trim()
-                .replace(" ", "_")
-                .toUpperCase();
+        String trimmedValue = value.trim();
 
-        for (PurposeOfVisit purpose : PurposeOfVisit.values()) {
-            if (purpose.name().equals(normalizedValue)) {
-                return purpose;
-            }
-            if (purpose.label.equalsIgnoreCase(value.trim())) {
-                return purpose;
+        // Try matching by enum name first (e.g., "INTERVIEW")
+        try {
+            return PurposeOfVisit.valueOf(trimmedValue.toUpperCase().replace(" ", "_"));
+        } catch (IllegalArgumentException e) {
+            // If not found by name, try matching by label
+            for (PurposeOfVisit purpose : PurposeOfVisit.values()) {
+                if (purpose.label.equalsIgnoreCase(trimmedValue)) {
+                    return purpose;
+                }
             }
         }
 
