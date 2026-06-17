@@ -40,3 +40,4 @@ public enum PurposeOfVisit {
         throw new IllegalArgumentException("Invalid purposeOfVisit: " + value);
     }
 }
+

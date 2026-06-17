@@ -1,16 +1,22 @@
 package com.visitor_x.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -40,23 +46,63 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
-    }
-
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<?> handle(HttpMessageNotReadableException ex) {
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
+            WebRequest request) {
 
-        log.error("JSON ERROR", ex);
+        Throwable cause = ex.getCause();
 
-        return ResponseEntity.badRequest()
-                .body(Map.of(
-                        "error",
-                        ex.getMostSpecificCause().getMessage()
-                ));
+        if (cause instanceof InvalidFormatException ife) {
+            String fieldName = ife.getPath().isEmpty()
+                    ? "unknown"
+                    : ife.getPath().get(ife.getPath().size() - 1).getFieldName();
+
+            Object invalidValue = ife.getValue();
+            Class<?> targetType = ife.getTargetType();
+
+            if (targetType == com.visitor_x.enums.PurposeOfVisit.class) {
+                List<String> allowedValues = Arrays.stream(com.visitor_x.enums.PurposeOfVisit.values())
+                        .map(com.visitor_x.enums.PurposeOfVisit::getLabel)
+                        .toList();
+
+                ApiErrorResponse errorResponse = new ApiErrorResponse(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Bad Request",
+                        "Invalid enum value for field '" + fieldName + "'",
+                        List.of(
+                                "Rejected value: " + invalidValue,
+                                "Allowed values: " + allowedValues
+                        )
+                );
+
+                return ResponseEntity.badRequest().body(errorResponse);
+            }
+        }
+
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                "Malformed JSON request",
+                List.of(ex.getMostSpecificCause().getMessage())
+        );
+
+        return ResponseEntity.badRequest().body(errorResponse);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ApiErrorResponse errorResponse = new ApiErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Bad Request",
+                ex.getMessage(),
+                List.of()
+        );
+
+        return ResponseEntity.badRequest().body(errorResponse);
+    }
     private ResponseEntity<Object> buildResponse(HttpStatus status, String message) {
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
