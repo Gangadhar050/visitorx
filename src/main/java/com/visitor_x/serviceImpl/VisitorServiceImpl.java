@@ -3,6 +3,7 @@ package com.visitor_x.serviceImpl;
 import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
+import com.visitor_x.enums.PurposeOfVisit;
 import com.visitor_x.exception.DuplicateResourceException;
 import com.visitor_x.exception.ResourceNotFoundException;
 import com.visitor_x.repository.VisitorRepository;
@@ -12,9 +13,7 @@ import com.visitor_x.service.VisitorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Arrays;
 import java.util.Base64;
 
 @Service
@@ -26,7 +25,7 @@ public class VisitorServiceImpl implements VisitorService {
     private final PhotoService photoService;
     @Override
     @Transactional
-    public VisitorResponseDTO registerVisitorWithPhoto(VisitorRequestDTO request) {
+    public VisitorResponseDTO registerVisitorWithPhoto(VisitorRequestDTO request, PurposeOfVisit purpose) {
 
         if (request.getEmail() == null ||
                 !request.getEmail().matches("^[A-Za-z0-9+_.-]+@gmail\\.com$")) {
@@ -55,7 +54,7 @@ public class VisitorServiceImpl implements VisitorService {
                 .name(request.getName())
                 .mobileNumber(request.getMobileNumber())
                 .email(request.getEmail())
-                .purposeOfVisit(request.getPurposeOfVisit())
+                .purposeOfVisit(purpose)
                 .photo(jpgPhotoData)
                 .build();
 

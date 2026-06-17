@@ -1,8 +1,5 @@
 package com.visitor_x.enums;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 public enum PurposeOfVisit {
 
     MEETING("Meeting"),
@@ -16,28 +13,20 @@ public enum PurposeOfVisit {
         this.label = label;
     }
 
-    @JsonValue
     public String getLabel() {
         return label;
     }
 
-    @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static PurposeOfVisit fromValue(String value) {
-        System.out.println("PurposeOfVisit.fromValue called with: " + value);
-
         if (value == null || value.trim().isEmpty()) {
-            throw new IllegalArgumentException("purposeOfVisit is required");
+            throw new IllegalArgumentException("Purpose of visit is required");
         }
 
         String raw = value.trim();
-        String normalized = raw
-                .replace("-", "_")
-                .replace(" ", "_")
-                .toUpperCase();
+        String normalized = raw.replace("-", "_").replace(" ", "_").toUpperCase();
 
         for (PurposeOfVisit purpose : values()) {
-            if (purpose.name().equals(normalized)
-                    || purpose.label.equalsIgnoreCase(raw)) {
+            if (purpose.name().equals(normalized) || purpose.label.equalsIgnoreCase(raw)) {
                 return purpose;
             }
         }

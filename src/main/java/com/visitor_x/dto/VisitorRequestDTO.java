@@ -26,7 +26,7 @@ public class VisitorRequestDTO {
     )
     private String email;
 
-    private PurposeOfVisit purposeOfVisit;
+    private String purposeOfVisit;
 
     @NotBlank(message = "Photo is required")
     private String photoBase64;
