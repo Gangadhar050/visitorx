@@ -1,5 +1,8 @@
 package com.visitor_x.enums;
 
+import lombok.Data;
+
+
 public enum PurposeOfVisit {
 
     MEETING("Meeting"),

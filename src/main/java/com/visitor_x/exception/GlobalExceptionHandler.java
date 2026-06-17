@@ -14,10 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestControllerAdvice
 @Slf4j
@@ -101,7 +98,19 @@ public class GlobalExceptionHandler {
                 List.of()
         );
 
+
         return ResponseEntity.badRequest().body(errorResponse);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, Object>> handleRuntime(RuntimeException ex) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", 500);
+        body.put("error", "Internal Server Error");
+        body.put("message", ex.getMessage());
+        body.put("details", Collections.emptyList());
+        body.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
     }
     private ResponseEntity<Object> buildResponse(HttpStatus status, String message) {
         Map<String, Object> response = new HashMap<>();
