@@ -24,7 +24,7 @@ public class VisitorController {
 public ResponseEntity<?> registerVisitorWithPhoto(
         @Valid @RequestBody VisitorRequestDTO request) {
 
-    PurposeOfVisit purpose = PurposeOfVisit.fromValue(request.getPurposeOfVisit());
+    PurposeOfVisit purpose = PurposeOfVisit.fromValue(String.valueOf(request.getPurposeOfVisit()));
 
     System.out.println("Name = " + request.getName());
     System.out.println("Email = " + request.getEmail());
