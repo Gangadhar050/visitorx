@@ -1,5 +1,6 @@
 package com.visitor_x.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Data;
 
 
@@ -20,6 +21,7 @@ public enum PurposeOfVisit {
         return label;
     }
 
+    @JsonCreator
     public static PurposeOfVisit fromValue(String value) {
         if (value == null || value.trim().isEmpty()) {
             throw new IllegalArgumentException("Purpose of visit is required");

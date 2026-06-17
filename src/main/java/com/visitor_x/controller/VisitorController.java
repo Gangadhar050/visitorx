@@ -24,7 +24,7 @@ public class VisitorController {
 public ResponseEntity<?> registerVisitorWithPhoto(
         @Valid @RequestBody VisitorRequestDTO request) {
 
-    PurposeOfVisit purpose = PurposeOfVisit.fromValue(String.valueOf(request.getPurposeOfVisit()));
+      PurposeOfVisit purpose = request.getPurposeOfVisit();
 
     System.out.println("Name = " + request.getName());
     System.out.println("Email = " + request.getEmail());
@@ -36,7 +36,15 @@ public ResponseEntity<?> registerVisitorWithPhoto(
     }
 
     return ResponseEntity.ok(
-            visitorService.registerVisitorWithPhoto(request, purpose)
+            visitorService.registerVisitorWithPhoto(request,request.getPurposeOfVisit())
     );
 }
+    @PostMapping("/test")
+    public ResponseEntity<String> test(@RequestBody VisitorRequestDTO dto) {
+
+        System.out.println("DTO Received");
+        System.out.println(dto.getPurposeOfVisit());
+
+        return ResponseEntity.ok("SUCCESS");
+    }
 }

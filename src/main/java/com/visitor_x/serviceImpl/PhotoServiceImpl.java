@@ -33,8 +33,8 @@ public class PhotoServiceImpl implements PhotoService {
     );
 
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
-    private static final int THUMB_WIDTH = 100;
-    private static final int THUMB_HEIGHT = 100;
+    private static final int THUMB_WIDTH = 200;
+    private static final int THUMB_HEIGHT = 200;
 
     @Override
     public byte[] convertBase64ToJpg(String photoBase64) {

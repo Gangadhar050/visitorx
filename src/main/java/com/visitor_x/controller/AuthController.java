@@ -47,11 +47,6 @@ public class AuthController {
                 Map.of("message", "Logged out successfully")
         );
     }
-    @GetMapping("/test")
-    public ResponseEntity<Map<String, String>> apitest() {
-        return ResponseEntity.ok(
-                Map.of("message", "API is Running successfully")
-        );
-    }
+
 
 }
