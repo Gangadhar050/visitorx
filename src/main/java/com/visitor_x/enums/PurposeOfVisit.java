@@ -23,12 +23,17 @@ public enum PurposeOfVisit {
 
     @JsonCreator(mode = JsonCreator.Mode.DELEGATING)
     public static PurposeOfVisit fromValue(String value) {
+        System.out.println("PurposeOfVisit.fromValue called with: " + value);
+
         if (value == null || value.trim().isEmpty()) {
-            return null;
+            throw new IllegalArgumentException("purposeOfVisit is required");
         }
 
         String raw = value.trim();
-        String normalized = raw.replace(" ", "_").toUpperCase();
+        String normalized = raw
+                .replace("-", "_")
+                .replace(" ", "_")
+                .toUpperCase();
 
         for (PurposeOfVisit purpose : values()) {
             if (purpose.name().equals(normalized)
@@ -40,4 +45,3 @@ public enum PurposeOfVisit {
         throw new IllegalArgumentException("Invalid purposeOfVisit: " + value);
     }
 }
-
