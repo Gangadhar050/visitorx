@@ -1,6 +1,7 @@
 package com.visitor_x.controller;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.UpdateVisitorRequestDTO;
 import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.service.AdminDashboardService;
@@ -70,7 +71,7 @@ public class AdminDashboardController {
     @PutMapping("/visitors/{id}")
     public ResponseEntity<VisitorResponseDTO> updateVisitor(
             @PathVariable Long id,
-            @Valid @RequestBody VisitorRequestDTO requestDTO) {
+            @Valid @RequestBody UpdateVisitorRequestDTO requestDTO) {
 
         return ResponseEntity.ok(
                 dashboardService.updateVisitor(id, requestDTO)

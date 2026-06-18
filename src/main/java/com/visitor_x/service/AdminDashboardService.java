@@ -1,6 +1,7 @@
 package com.visitor_x.service;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.UpdateVisitorRequestDTO;
 import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,7 @@ public interface AdminDashboardService {
 
     public String deleteVisitor(Long id);
 
-    VisitorResponseDTO updateVisitor(Long id, VisitorRequestDTO requestDTO);
+    VisitorResponseDTO updateVisitor(Long id, UpdateVisitorRequestDTO requestDTO);
 
 
 }
