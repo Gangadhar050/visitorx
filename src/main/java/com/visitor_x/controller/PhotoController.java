@@ -20,14 +20,6 @@ public class PhotoController {
 
     private final VisitorRepository visitorRepository;
 
-//    @PostMapping("/capture")
-//    public ResponseEntity<?> saveVisitor(
-//            @RequestBody VisitorRequestDTO request) {
-//
-//        log.info("REQUEST RECEIVED = {}", request);
-//
-//        return ResponseEntity.ok().build();
-//    }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")

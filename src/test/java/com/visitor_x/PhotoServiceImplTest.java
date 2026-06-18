@@ -4,7 +4,6 @@ import com.visitor_x.serviceImpl.PhotoServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -22,151 +21,209 @@ class PhotoServiceImplTest {
         photoService = new PhotoServiceImpl();
     }
 
-    @Test
-    void convertBase64ToJpg_ValidImage() throws Exception {
+    private String generateValidBase64Image() throws Exception {
 
         BufferedImage image =
-                new BufferedImage(100, 100,
-                        BufferedImage.TYPE_INT_RGB);
+                new BufferedImage(100, 100, BufferedImage.TYPE_INT_RGB);
 
-        ByteArrayOutputStream outputStream =
+        ByteArrayOutputStream baos =
                 new ByteArrayOutputStream();
 
-        ImageIO.write(image, "png", outputStream);
+        ImageIO.write(image, "png", baos);
 
         String base64 =
+                Base64.getEncoder().encodeToString(baos.toByteArray());
+
+        return "data:image/png;base64," + base64;
+    }
+
+    @Test
+    void convertBase64ToJpg_ShouldConvertSuccessfully() throws Exception {
+
+        String base64Image = generateValidBase64Image();
+
+        byte[] result =
+                photoService.convertBase64ToJpg(base64Image);
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    void convertBase64ToJpg_ShouldThrow_WhenNullInput() {
+
+        IllegalArgumentException ex =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> photoService.convertBase64ToJpg(null)
+                );
+
+        assertEquals("Photo is required", ex.getMessage());
+    }
+
+    @Test
+    void convertBase64ToJpg_ShouldThrow_WhenBlankInput() {
+
+        IllegalArgumentException ex =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> photoService.convertBase64ToJpg(" ")
+                );
+
+        assertEquals("Photo is required", ex.getMessage());
+    }
+
+    @Test
+    void convertBase64ToJpg_ShouldThrow_WhenInvalidDataUri() {
+
+        String invalid =
+                "data:image/png;base64";
+
+        IllegalArgumentException ex =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> photoService.convertBase64ToJpg(invalid)
+                );
+
+        assertEquals(
+                "Invalid data URI format",
+                ex.getMessage()
+        );
+    }
+
+    @Test
+    void convertBase64ToJpg_ShouldThrow_WhenUnsupportedMimeType() {
+
+        String invalid =
+                "data:image/tiff;base64,abcd";
+
+        IllegalArgumentException ex =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> photoService.convertBase64ToJpg(invalid)
+                );
+
+        assertTrue(
+                ex.getMessage().contains("Unsupported image type")
+        );
+    }
+
+    @Test
+    void convertBase64ToJpg_ShouldThrow_WhenInvalidBase64() {
+
+        String invalid =
+                "data:image/png;base64,@@@@@@";
+
+        IllegalArgumentException ex =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> photoService.convertBase64ToJpg(invalid)
+                );
+
+        assertEquals(
+                "Invalid Base64 encoding",
+                ex.getMessage()
+        );
+    }
+
+    @Test
+    void convertBase64ToJpg_ShouldThrow_WhenNotImageData() {
+
+        String text =
                 Base64.getEncoder()
-                        .encodeToString(outputStream.toByteArray());
+                        .encodeToString("Hello".getBytes());
 
-        byte[] result =
-                photoService.convertBase64ToJpg(base64);
+        String invalid =
+                "data:image/png;base64," + text;
 
-        assertNotNull(result);
-        assertTrue(result.length > 0);
-    }
-
-    @Test
-    void convertBase64ToJpg_WithDataUriPrefix() throws Exception {
-
-        BufferedImage image =
-                new BufferedImage(100, 100,
-                        BufferedImage.TYPE_INT_RGB);
-
-        ByteArrayOutputStream outputStream =
-                new ByteArrayOutputStream();
-
-        ImageIO.write(image, "png", outputStream);
-
-        String base64 =
-                "data:image/png;base64," +
-                        Base64.getEncoder()
-                                .encodeToString(
-                                        outputStream.toByteArray());
-
-        byte[] result =
-                photoService.convertBase64ToJpg(base64);
-
-        assertNotNull(result);
-        assertTrue(result.length > 0);
-    }
-
-    @Test
-    void convertBase64ToJpg_InvalidBase64() {
-
-        IllegalArgumentException exception =
+        IllegalArgumentException ex =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> photoService.convertBase64ToJpg(
-                                "invalid-base64-data")
+                        () -> photoService.convertBase64ToJpg(invalid)
                 );
 
         assertEquals(
-                "Invalid Base64 image data",
-                exception.getMessage());
+                "Decoded data is not a valid supported image",
+                ex.getMessage()
+        );
     }
 
     @Test
-    void convertBase64ToJpg_EmptyString() {
+    void isValidImage_ShouldReturnTrue_ForValidImage() {
 
-        IllegalArgumentException exception =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () -> photoService.convertBase64ToJpg("")
-                );
-
-        assertEquals(
-                "Invalid Base64 image data",
-                exception.getMessage());
-    }
-
-    @Test
-    void isValidImage_Jpeg() {
-
-        MultipartFile file =
+        MockMultipartFile file =
                 new MockMultipartFile(
-                        "photo",
-                        "test.jpg",
-                        "image/jpeg",
-                        "content".getBytes());
-
-        assertTrue(photoService.isValidImage(file));
-    }
-
-    @Test
-    void isValidImage_Png() {
-
-        MultipartFile file =
-                new MockMultipartFile(
-                        "photo",
-                        "test.png",
+                        "file",
+                        "image.png",
                         "image/png",
-                        "content".getBytes());
+                        new byte[]{1, 2, 3}
+                );
 
         assertTrue(photoService.isValidImage(file));
     }
 
     @Test
-    void isValidImage_InvalidMimeType() {
-
-        MultipartFile file =
-                new MockMultipartFile(
-                        "file",
-                        "test.pdf",
-                        "application/pdf",
-                        "content".getBytes());
-
-        assertFalse(photoService.isValidImage(file));
-    }
-
-    @Test
-    void isValidImage_NullContentType() {
-
-        MultipartFile file =
-                new MockMultipartFile(
-                        "file",
-                        "test",
-                        null,
-                        "content".getBytes());
-
-        assertFalse(photoService.isValidImage(file));
-    }
-
-    @Test
-    void isValidImage_EmptyFile() {
-
-        MultipartFile file =
-                new MockMultipartFile(
-                        "file",
-                        "test.jpg",
-                        "image/jpeg",
-                        new byte[0]);
-
-        assertFalse(photoService.isValidImage(file));
-    }
-
-    @Test
-    void isValidImage_NullFile() {
+    void isValidImage_ShouldReturnFalse_WhenFileIsNull() {
 
         assertFalse(photoService.isValidImage(null));
+    }
+
+    @Test
+    void isValidImage_ShouldReturnFalse_WhenFileIsEmpty() {
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "empty.png",
+                        "image/png",
+                        new byte[]{}
+                );
+
+        assertFalse(photoService.isValidImage(file));
+    }
+
+    @Test
+    void isValidImage_ShouldReturnFalse_WhenFileTooLarge() {
+
+        byte[] data =
+                new byte[6 * 1024 * 1024];
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "large.png",
+                        "image/png",
+                        data
+                );
+
+        assertFalse(photoService.isValidImage(file));
+    }
+
+    @Test
+    void isValidImage_ShouldReturnFalse_WhenContentTypeNull() {
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "image.png",
+                        null,
+                        new byte[]{1, 2}
+                );
+
+        assertFalse(photoService.isValidImage(file));
+    }
+
+    @Test
+    void isValidImage_ShouldReturnFalse_WhenUnsupportedType() {
+
+        MockMultipartFile file =
+                new MockMultipartFile(
+                        "file",
+                        "file.pdf",
+                        "application/pdf",
+                        new byte[]{1, 2}
+                );
+
+        assertFalse(photoService.isValidImage(file));
     }
 }

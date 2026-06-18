@@ -33,7 +33,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // Explicitly allow visitor registration POST from frontend
                         .requestMatchers(HttpMethod.POST, "/api/visitor/register").permitAll()
-                        .requestMatchers("/api/visitor/register",
+                        .requestMatchers("/api/visitor/register/test",
                                 "/api/qr/generate-form",   // public: visitor scans QR → gets form URL
                                 "/swagger-ui/**",
                                 "/api/auth/**",

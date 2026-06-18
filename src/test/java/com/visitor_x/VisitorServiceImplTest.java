@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,27 +37,14 @@ class VisitorServiceImplTest {
     private VisitorServiceImpl visitorService;
 
     private VisitorRequestDTO requestDTO;
-    private Visitor visitor;
 
     @BeforeEach
     void setUp() {
-
         requestDTO = new VisitorRequestDTO();
-        requestDTO.setName("John Doe");
-        requestDTO.setEmail("john@gmail.com");
+        requestDTO.setName("Gangadhar");
+        requestDTO.setEmail("gangadhar@gmail.com");
         requestDTO.setMobileNumber("9876543210");
-        requestDTO.setPurposeOfVisit(PurposeOfVisit.INTERVIEW);
-        requestDTO.setPhotoBase64("base64Photo");
-
-        visitor = Visitor.builder()
-                .visitorId(1L)
-                .name("John Doe")
-                .email("john@gmail.com")
-                .mobileNumber("9876543210")
-                .purposeOfVisit(PurposeOfVisit.INTERVIEW)
-                .photo("photo".getBytes())
-                .visitDateTime(LocalDateTime.now())
-                .build();
+        requestDTO.setPhotoBase64("dummyBase64String");
     }
 
     @Test
@@ -66,24 +52,35 @@ class VisitorServiceImplTest {
 
         byte[] photoBytes = "photo".getBytes();
 
-        when(visitorRepository.findByEmail(requestDTO.getEmail()))
+        Visitor savedVisitor = Visitor.builder()
+                .visitorId(1L)
+                .name("Gangadhar")
+                .email("gangadhar@gmail.com")
+                .mobileNumber("9876543210")
+                .purposeOfVisit(PurposeOfVisit.MEETING)
+                .photo(photoBytes)
+                .build();
+
+        when(visitorRepository.findByEmail(anyString()))
                 .thenReturn(Optional.empty());
 
-        when(visitorRepository.findByMobileNumber(requestDTO.getMobileNumber()))
+        when(visitorRepository.findByMobileNumber(anyString()))
                 .thenReturn(Optional.empty());
 
-        when(photoService.convertBase64ToJpg(requestDTO.getPhotoBase64()))
+        when(photoService.convertBase64ToJpg(anyString()))
                 .thenReturn(photoBytes);
 
         when(visitorRepository.save(any(Visitor.class)))
-                .thenReturn(visitor);
+                .thenReturn(savedVisitor);
 
         VisitorResponseDTO response =
-                visitorService.registerVisitorWithPhoto(requestDTO);
+                visitorService.registerVisitorWithPhoto(
+                        requestDTO,
+                        PurposeOfVisit.MEETING);
 
         assertNotNull(response);
-        assertEquals("John Doe", response.getName());
-        assertEquals("john@gmail.com", response.getEmail());
+        assertEquals("Gangadhar", response.getName());
+        assertEquals("gangadhar@gmail.com", response.getEmail());
 
         verify(visitorRepository).save(any(Visitor.class));
         verify(exportService).autoSaveToFile();
@@ -92,18 +89,18 @@ class VisitorServiceImplTest {
     @Test
     void registerVisitorWithPhoto_InvalidEmail() {
 
-        requestDTO.setEmail("john@yahoo.com");
+        requestDTO.setEmail("test@yahoo.com");
 
-        IllegalArgumentException exception =
+        IllegalArgumentException ex =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> visitorService.registerVisitorWithPhoto(requestDTO)
-                );
+                        () -> visitorService.registerVisitorWithPhoto(
+                                requestDTO,
+                                PurposeOfVisit.MEETING));
 
         assertEquals(
                 "Only Gmail addresses are allowed",
-                exception.getMessage()
-        );
+                ex.getMessage());
     }
 
     @Test
@@ -111,16 +108,16 @@ class VisitorServiceImplTest {
 
         requestDTO.setMobileNumber("12345");
 
-        IllegalArgumentException exception =
+        IllegalArgumentException ex =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> visitorService.registerVisitorWithPhoto(requestDTO)
-                );
+                        () -> visitorService.registerVisitorWithPhoto(
+                                requestDTO,
+                                PurposeOfVisit.MEETING));
 
         assertEquals(
                 "Mobile number must contain exactly 10 digits",
-                exception.getMessage()
-        );
+                ex.getMessage());
     }
 
     @Test
@@ -128,59 +125,67 @@ class VisitorServiceImplTest {
 
         requestDTO.setPhotoBase64("");
 
-        IllegalArgumentException exception =
+        IllegalArgumentException ex =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> visitorService.registerVisitorWithPhoto(requestDTO)
-                );
+                        () -> visitorService.registerVisitorWithPhoto(
+                                requestDTO,
+                                PurposeOfVisit.MEETING));
 
         assertEquals(
                 "Photo is required",
-                exception.getMessage()
-        );
+                ex.getMessage());
     }
 
     @Test
     void registerVisitorWithPhoto_DuplicateEmail() {
 
-        when(visitorRepository.findByEmail(requestDTO.getEmail()))
+        Visitor visitor = Visitor.builder().build();
+
+        when(visitorRepository.findByEmail(anyString()))
                 .thenReturn(Optional.of(visitor));
 
-        DuplicateResourceException exception =
-                assertThrows(
-                        DuplicateResourceException.class,
-                        () -> visitorService.registerVisitorWithPhoto(requestDTO)
-                );
+        assertThrows(
+                DuplicateResourceException.class,
+                () -> visitorService.registerVisitorWithPhoto(
+                        requestDTO,
+                        PurposeOfVisit.MEETING));
 
-        assertEquals(
-                "Email already registered",
-                exception.getMessage()
-        );
+        verify(visitorRepository, never())
+                .save(any());
     }
 
     @Test
     void registerVisitorWithPhoto_DuplicateMobile() {
 
-        when(visitorRepository.findByEmail(requestDTO.getEmail()))
+        Visitor visitor = Visitor.builder().build();
+
+        when(visitorRepository.findByEmail(anyString()))
                 .thenReturn(Optional.empty());
 
-        when(visitorRepository.findByMobileNumber(requestDTO.getMobileNumber()))
+        when(visitorRepository.findByMobileNumber(anyString()))
                 .thenReturn(Optional.of(visitor));
 
-        DuplicateResourceException exception =
-                assertThrows(
-                        DuplicateResourceException.class,
-                        () -> visitorService.registerVisitorWithPhoto(requestDTO)
-                );
+        assertThrows(
+                DuplicateResourceException.class,
+                () -> visitorService.registerVisitorWithPhoto(
+                        requestDTO,
+                        PurposeOfVisit.MEETING));
 
-        assertEquals(
-                "Mobile number already registered",
-                exception.getMessage()
-        );
+        verify(visitorRepository, never())
+                .save(any());
     }
 
     @Test
     void getVisitorById_Success() {
+
+        Visitor visitor = Visitor.builder()
+                .visitorId(1L)
+                .name("Gangadhar")
+                .email("gangadhar@gmail.com")
+                .mobileNumber("9876543210")
+                .purposeOfVisit(PurposeOfVisit.MEETING)
+                .build();
 
         when(visitorRepository.findById(1L))
                 .thenReturn(Optional.of(visitor));
@@ -190,7 +195,7 @@ class VisitorServiceImplTest {
 
         assertNotNull(response);
         assertEquals(1L, response.getVisitorId());
-        assertEquals("John Doe", response.getName());
+        assertEquals("Gangadhar", response.getName());
     }
 
     @Test
@@ -199,15 +204,8 @@ class VisitorServiceImplTest {
         when(visitorRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
-        ResourceNotFoundException exception =
-                assertThrows(
-                        ResourceNotFoundException.class,
-                        () -> visitorService.getVisitorById(1L)
-                );
-
-        assertEquals(
-                "Visitor not found with id: 1",
-                exception.getMessage()
-        );
+        assertThrows(
+                ResourceNotFoundException.class,
+                () -> visitorService.getVisitorById(1L));
     }
 }

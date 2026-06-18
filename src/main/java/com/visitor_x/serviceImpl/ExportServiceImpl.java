@@ -27,8 +27,8 @@ public class ExportServiceImpl implements ExportService {
     @Value("${app.export.save-path:exports/}")
     private String savePath;
 
-    @Value("${app.base-url:http://localhost:8080}")
-    private String baseUrl;
+//    @Value("${app.base-url=http://localhost:8080/}")
+//    private String baseUrl;
 
     // ── Download via Postman / browser ──────────────────────────
     @Override
@@ -78,15 +78,14 @@ public class ExportServiceImpl implements ExportService {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Visitors");
 
-        // Header style
         CellStyle headerStyle = workbook.createCellStyle();
         Font font = workbook.createFont();
         font.setBold(true);
         headerStyle.setFont(font);
 
         String[] columns = {
-                "ID", "Name", "Mobile", "Email",
-                "Purpose","Visit Time","Photo Link"
+                "SL/NO", "Visitor_ID", "Name", "Mobile", "Email",
+                "Purpose", "Visit Time", "Photo"
         };
 
         Row header = sheet.createRow(0);
@@ -96,63 +95,46 @@ public class ExportServiceImpl implements ExportService {
             cell.setCellStyle(headerStyle);
         }
 
-        int rowNum = 1;
-
-        // Hyperlink style: blue + underline
-        CellStyle linkStyle = workbook.createCellStyle();
-        Font linkFont = workbook.createFont();
-        linkFont.setUnderline(Font.U_SINGLE);
-        linkFont.setColor(IndexedColors.BLUE.getIndex());
-        linkStyle.setFont(linkFont);
-
         CreationHelper helper = workbook.getCreationHelper();
+        Drawing<?> drawing = sheet.createDrawingPatriarch();
+
+        int rowNum = 1;
+        int slNo = 1;
 
         for (Visitor v : visitors) {
-
             Row row = sheet.createRow(rowNum);
+            row.setHeightInPoints(80);
 
-            row.createCell(0).setCellValue(
-                    v.getVisitorId() != null ? v.getVisitorId() : 0L);
+            row.createCell(0).setCellValue(slNo++);
+            row.createCell(1).setCellValue(v.getVisitorId() != null ? v.getVisitorId() : 0L);
+            row.createCell(2).setCellValue(v.getName() != null ? v.getName() : "");
+            row.createCell(3).setCellValue(v.getMobileNumber() != null ? v.getMobileNumber() : "");
+            row.createCell(4).setCellValue(v.getEmail() != null ? v.getEmail() : "");
+            row.createCell(5).setCellValue(v.getPurposeOfVisit() != null ? v.getPurposeOfVisit().name() : "");
+            row.createCell(6).setCellValue(v.getVisitDateTime() != null ? v.getVisitDateTime().toString() : "");
 
-            row.createCell(1).setCellValue(
-                    v.getName() != null ? v.getName() : "");
+            if (v.getPhoto() != null && v.getPhoto().length > 0) {
+                int pictureIdx = workbook.addPicture(v.getPhoto(), Workbook.PICTURE_TYPE_JPEG);
 
-            row.createCell(2).setCellValue(
-                    v.getMobileNumber() != null ? v.getMobileNumber() : "");
+                ClientAnchor anchor = helper.createClientAnchor();
+                anchor.setCol1(7);
+                anchor.setRow1(rowNum);
+                anchor.setCol2(8);
+                anchor.setRow2(rowNum + 1);
 
-            row.createCell(3).setCellValue(
-                    v.getEmail() != null ? v.getEmail() : "");
-
-            row.createCell(4).setCellValue(
-                    v.getPurposeOfVisit() != null
-                            ? v.getPurposeOfVisit().name()
-                            : "");
-
-            row.createCell(5).setCellValue(
-                    v.getVisitDateTime() != null
-                            ? v.getVisitDateTime().toString()
-                            : "");
-
-            Cell photoCell = row.createCell(6);
-            if (v.getPhoto() != null && v.getPhoto().length > 0 && v.getVisitorId() != null) {
-
-                String photoUrl = baseUrl + "/api/photos/" + v.getVisitorId();
-
-                Hyperlink link = helper.createHyperlink(HyperlinkType.URL);
-                link.setAddress(photoUrl);
-
-                photoCell.setCellValue("View Photo");
-                photoCell.setHyperlink(link);
-                photoCell.setCellStyle(linkStyle);
+                Picture picture = drawing.createPicture(anchor, pictureIdx);
+                picture.resize(1.0);
             } else {
-                photoCell.setCellValue("No Photo");
+                row.createCell(7).setCellValue("No Photo");
             }
 
             rowNum++;
         }
-        for (int i = 0; i < columns.length; i++) {
+
+        for (int i = 0; i < 6; i++) {
             sheet.autoSizeColumn(i);
         }
+        sheet.setColumnWidth(6, 15 * 256);
 
         return workbook;
     }

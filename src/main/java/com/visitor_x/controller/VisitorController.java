@@ -19,24 +19,25 @@ public class VisitorController {
 
     private final VisitorService visitorService;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerVisitorWithPhoto(
-            @Valid @RequestBody VisitorRequestDTO request) {
 
-        System.out.println("Name = " + request.getName());
-        System.out.println("Email = " + request.getEmail());
-        System.out.println("Mobile = " + request.getMobileNumber());
-        System.out.println("Purpose = " + request.getPurposeOfVisit());
+@PostMapping("/register")
+public ResponseEntity<?> registerVisitorWithPhoto(
+        @Valid @RequestBody VisitorRequestDTO request) {
 
-        if (request.getPhotoBase64() != null) {
-            System.out.println(
-                    "Photo Length = " +
-                            request.getPhotoBase64().length()
-            );
-        }
+      PurposeOfVisit purpose = request.getPurposeOfVisit();
 
-        return ResponseEntity.ok(
-                visitorService.registerVisitorWithPhoto(request)
-        );
+    System.out.println("Name = " + request.getName());
+    System.out.println("Email = " + request.getEmail());
+    System.out.println("Mobile = " + request.getMobileNumber());
+    System.out.println("Purpose = " + purpose);
+
+    if (request.getPhotoBase64() != null) {
+        System.out.println("Photo Length = " + request.getPhotoBase64().length());
     }
+
+    return ResponseEntity.ok(
+            visitorService.registerVisitorWithPhoto(request,request.getPurposeOfVisit())
+    );
+}
+
 }

@@ -1,6 +1,7 @@
 package com.visitor_x.serviceImpl;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.exception.ResourceNotFoundException;
@@ -54,13 +55,15 @@ public class AdminDashboardServiceImpl
 
     @Override
     public Page<VisitorResponseDTO> getAllVisitors(Pageable pageable) {
-        if (!visitorRepository.existsById(1L)) {
-            throw new ResourceNotFoundException(
-                    "No visitors found");
-        }
-        return visitorRepository.findAll(pageable).map(this::toDTO);
-    }
 
+        Page<Visitor> visitors = visitorRepository.findAll(pageable);
+
+        if (visitors.isEmpty()) {
+            throw new ResourceNotFoundException("No visitors found");
+        }
+
+        return visitors.map(this::toDTO);
+    }
     @Override
     public VisitorResponseDTO getVisitor(Long id) {
         if (id == null || id <= 0) {
@@ -79,40 +82,85 @@ public class AdminDashboardServiceImpl
     @Override
     public Page<VisitorResponseDTO> searchVisitors(
             String keyword, Pageable pageable) {
+
         if (keyword == null || keyword.isBlank()) {
             throw new IllegalArgumentException(
                     "Search keyword cannot be empty");
         }
-        if (!visitorRepository.existsById(1L)) {
+
+        Page<Visitor> visitors =
+                visitorRepository.searchByNameOrMobile(keyword, pageable);
+
+        if (visitors.isEmpty()) {
             throw new ResourceNotFoundException(
                     "No visitors found matching: " + keyword);
         }
-        return visitorRepository
-                .searchByNameOrMobile(keyword, pageable)
-                .map(this::toDTO);
+
+        return visitors.map(this::toDTO);
     }
+
 
     @Override
     public List<VisitorResponseDTO> getTodayVisitors() {
         LocalDate today = LocalDate.now();
-        if (!visitorRepository.existsById(1L)) {
-            throw new ResourceNotFoundException(
-                    "No visitors found for today");
+
+        List<Visitor> visitors = visitorRepository.findByVisitDateTimeBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+        );
+
+        if (visitors.isEmpty()) {
+            throw new ResourceNotFoundException("No visitors found for today");
         }
-        return visitorRepository
-                .findByVisitDateTimeBetween(
-                        today.atStartOfDay(),
-                        today.plusDays(1).atStartOfDay())
-                .stream().map(this::toDTO).toList();
+
+        return visitors.stream().map(this::toDTO).toList();
     }
 
+
     @Override
-    public void deleteVisitor(Long id) {
+    public String deleteVisitor(Long id) {
         if (!visitorRepository.existsById(id)) {
             throw new ResourceNotFoundException(
                     "Visitor not found with id: " + id);
         }
         visitorRepository.deleteById(id);
+        return "Visitor deleted successfully";
+    }
+
+    @Override
+    public VisitorResponseDTO updateVisitor(
+            Long id,
+            VisitorRequestDTO requestDTO) {
+
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid visitor ID: " + id);
+        }
+        if (visitorRepository.existsByEmailAndVisitorIdNot(
+                requestDTO.getEmail(), id)) {
+            throw new IllegalArgumentException(
+                    "Email already exists");
+        }
+
+        if (visitorRepository.existsByMobileNumberAndVisitorIdNot(
+                requestDTO.getMobileNumber(), id)) {
+            throw new IllegalArgumentException(
+                    "Mobile number already exists");
+        }
+
+        Visitor visitor = visitorRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Visitor not found with id: " + id));
+
+        visitor.setName(requestDTO.getName());
+        visitor.setMobileNumber(requestDTO.getMobileNumber());
+        visitor.setEmail(requestDTO.getEmail());
+        visitor.setPurposeOfVisit(requestDTO.getPurposeOfVisit());
+
+        Visitor updatedVisitor = visitorRepository.save(visitor);
+
+        return toDTO(updatedVisitor);
     }
 
 
