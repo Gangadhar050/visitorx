@@ -39,12 +39,5 @@ public ResponseEntity<?> registerVisitorWithPhoto(
             visitorService.registerVisitorWithPhoto(request,request.getPurposeOfVisit())
     );
 }
-    @PostMapping("/test")
-    public ResponseEntity<String> test(@RequestBody VisitorRequestDTO dto) {
 
-        System.out.println("DTO Received");
-        System.out.println(dto.getPurposeOfVisit());
-
-        return ResponseEntity.ok("SUCCESS");
-    }
 }

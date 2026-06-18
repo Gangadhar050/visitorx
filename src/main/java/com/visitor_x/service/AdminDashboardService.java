@@ -19,6 +19,6 @@ public interface AdminDashboardService {
 
     List<VisitorResponseDTO> getTodayVisitors();
 
-    void deleteVisitor(Long id);
+    public String deleteVisitor(Long id);
 
 }

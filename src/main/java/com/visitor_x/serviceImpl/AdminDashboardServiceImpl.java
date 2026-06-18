@@ -107,12 +107,13 @@ public class AdminDashboardServiceImpl
     }
 
     @Override
-    public void deleteVisitor(Long id) {
+    public String deleteVisitor(Long id) {
         if (!visitorRepository.existsById(id)) {
             throw new ResourceNotFoundException(
                     "Visitor not found with id: " + id);
         }
         visitorRepository.deleteById(id);
+        return "Visitor deleted successfully";
     }
 
 
