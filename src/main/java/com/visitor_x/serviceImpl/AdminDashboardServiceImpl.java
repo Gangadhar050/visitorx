@@ -1,6 +1,7 @@
 package com.visitor_x.serviceImpl;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.UpdateVisitorRequestDTO;
 import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
@@ -130,7 +131,7 @@ public class AdminDashboardServiceImpl
     @Override
     public VisitorResponseDTO updateVisitor(
             Long id,
-            VisitorRequestDTO requestDTO) {
+            UpdateVisitorRequestDTO requestDTO) {
 
         if (id == null || id <= 0) {
             throw new IllegalArgumentException(
