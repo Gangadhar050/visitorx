@@ -54,13 +54,15 @@ public class AdminDashboardServiceImpl
 
     @Override
     public Page<VisitorResponseDTO> getAllVisitors(Pageable pageable) {
-        if (!visitorRepository.existsById(1L)) {
-            throw new ResourceNotFoundException(
-                    "No visitors found");
-        }
-        return visitorRepository.findAll(pageable).map(this::toDTO);
-    }
 
+        Page<Visitor> visitors = visitorRepository.findAll(pageable);
+
+        if (visitors.isEmpty()) {
+            throw new ResourceNotFoundException("No visitors found");
+        }
+
+        return visitors.map(this::toDTO);
+    }
     @Override
     public VisitorResponseDTO getVisitor(Long id) {
         if (id == null || id <= 0) {
@@ -79,32 +81,40 @@ public class AdminDashboardServiceImpl
     @Override
     public Page<VisitorResponseDTO> searchVisitors(
             String keyword, Pageable pageable) {
+
         if (keyword == null || keyword.isBlank()) {
             throw new IllegalArgumentException(
                     "Search keyword cannot be empty");
         }
-        if (!visitorRepository.existsById(1L)) {
+
+        Page<Visitor> visitors =
+                visitorRepository.searchByNameOrMobile(keyword, pageable);
+
+        if (visitors.isEmpty()) {
             throw new ResourceNotFoundException(
                     "No visitors found matching: " + keyword);
         }
-        return visitorRepository
-                .searchByNameOrMobile(keyword, pageable)
-                .map(this::toDTO);
+
+        return visitors.map(this::toDTO);
     }
+
 
     @Override
     public List<VisitorResponseDTO> getTodayVisitors() {
         LocalDate today = LocalDate.now();
-        if (!visitorRepository.existsById(1L)) {
-            throw new ResourceNotFoundException(
-                    "No visitors found for today");
+
+        List<Visitor> visitors = visitorRepository.findByVisitDateTimeBetween(
+                today.atStartOfDay(),
+                today.plusDays(1).atStartOfDay()
+        );
+
+        if (visitors.isEmpty()) {
+            throw new ResourceNotFoundException("No visitors found for today");
         }
-        return visitorRepository
-                .findByVisitDateTimeBetween(
-                        today.atStartOfDay(),
-                        today.plusDays(1).atStartOfDay())
-                .stream().map(this::toDTO).toList();
+
+        return visitors.stream().map(this::toDTO).toList();
     }
+
 
     @Override
     public String deleteVisitor(Long id) {
@@ -115,6 +125,8 @@ public class AdminDashboardServiceImpl
         visitorRepository.deleteById(id);
         return "Visitor deleted successfully";
     }
+
+
 
 
     private VisitorResponseDTO toDTO(Visitor v) {
