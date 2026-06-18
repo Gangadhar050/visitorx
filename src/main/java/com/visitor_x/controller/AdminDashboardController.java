@@ -1,8 +1,10 @@
 package com.visitor_x.controller;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.service.AdminDashboardService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,6 +66,15 @@ public class AdminDashboardController {
             @PathVariable Long id) {
         dashboardService.deleteVisitor(id);
         return ResponseEntity.noContent().build();
+    }
+    @PutMapping("/visitors/{id}")
+    public ResponseEntity<VisitorResponseDTO> updateVisitor(
+            @PathVariable Long id,
+            @Valid @RequestBody VisitorRequestDTO requestDTO) {
+
+        return ResponseEntity.ok(
+                dashboardService.updateVisitor(id, requestDTO)
+        );
     }
 
 }

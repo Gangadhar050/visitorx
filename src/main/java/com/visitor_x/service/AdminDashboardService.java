@@ -1,6 +1,7 @@
 package com.visitor_x.service;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,7 +21,8 @@ public interface AdminDashboardService {
     List<VisitorResponseDTO> getTodayVisitors();
 
     public String deleteVisitor(Long id);
-//    public String updateVisitor(VisitorResponseDTO visitorResponseDTO);
+
+    VisitorResponseDTO updateVisitor(Long id, VisitorRequestDTO requestDTO);
 
 
 }

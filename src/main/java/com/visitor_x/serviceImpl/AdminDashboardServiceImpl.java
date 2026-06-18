@@ -1,6 +1,7 @@
 package com.visitor_x.serviceImpl;
 
 import com.visitor_x.dto.DashboardResponse;
+import com.visitor_x.dto.VisitorRequestDTO;
 import com.visitor_x.dto.VisitorResponseDTO;
 import com.visitor_x.entity.Visitor;
 import com.visitor_x.exception.ResourceNotFoundException;
@@ -126,7 +127,41 @@ public class AdminDashboardServiceImpl
         return "Visitor deleted successfully";
     }
 
+    @Override
+    public VisitorResponseDTO updateVisitor(
+            Long id,
+            VisitorRequestDTO requestDTO) {
 
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid visitor ID: " + id);
+        }
+        if (visitorRepository.existsByEmailAndVisitorIdNot(
+                requestDTO.getEmail(), id)) {
+            throw new IllegalArgumentException(
+                    "Email already exists");
+        }
+
+        if (visitorRepository.existsByMobileNumberAndVisitorIdNot(
+                requestDTO.getMobileNumber(), id)) {
+            throw new IllegalArgumentException(
+                    "Mobile number already exists");
+        }
+
+        Visitor visitor = visitorRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Visitor not found with id: " + id));
+
+        visitor.setName(requestDTO.getName());
+        visitor.setMobileNumber(requestDTO.getMobileNumber());
+        visitor.setEmail(requestDTO.getEmail());
+        visitor.setPurposeOfVisit(requestDTO.getPurposeOfVisit());
+
+        Visitor updatedVisitor = visitorRepository.save(visitor);
+
+        return toDTO(updatedVisitor);
+    }
 
 
     private VisitorResponseDTO toDTO(Visitor v) {

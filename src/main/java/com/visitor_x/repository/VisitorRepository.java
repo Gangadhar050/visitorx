@@ -32,4 +32,11 @@ public interface VisitorRepository extends JpaRepository<Visitor, Long> {
     // Today's visitors list
     List<Visitor> findByVisitDateTimeBetween(
             LocalDateTime start, LocalDateTime end);
+    boolean existsByEmailAndVisitorIdNot(
+            String email,
+            Long visitorId);
+
+    boolean existsByMobileNumberAndVisitorIdNot(
+            String mobileNumber,
+            Long visitorId);
 }
