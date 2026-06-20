@@ -6,7 +6,6 @@ import com.visitor_x.enums.PurposeOfVisit;
 
 public interface VisitorService {
 
-//    VisitorResponseDTO registerVisitor(VisitorRequestDTO request);
 
     VisitorResponseDTO getVisitorById(Long visitorId);
 

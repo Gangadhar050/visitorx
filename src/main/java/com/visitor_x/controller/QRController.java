@@ -23,19 +23,13 @@ public class QRController {
     @Value("${app.visitor.form-url}")
     private String visitorFormUrl;
 
-    /**
-     * Admin: download QR code as PNG image.
-     * Print or display this QR — visitors scan it to open the registration form.
-     */
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping(value = "/generate", produces = MediaType.IMAGE_PNG_VALUE)
     public ResponseEntity<byte[]> generateQR() throws WriterException, IOException {
         return ResponseEntity.ok(qrService.generateQRCode(visitorFormUrl));
     }
 
-    /**
-     * Admin: save QR code PNG to server disk, returns the saved file path.
-     */
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/save")
     public ResponseEntity<Map<String, String>> saveQR() throws WriterException, IOException {
@@ -45,10 +39,7 @@ public class QRController {
                 "message", "QR code saved successfully"));
     }
 
-    /**
-     * Public: called when visitor scans the QR code.
-     * Returns the visitor registration form URL so the frontend can redirect.
-     */
+
     @GetMapping("/generate-form")
     public ResponseEntity<Map<String, String>> getVisitorFormUrl() {
         return ResponseEntity.ok(Map.of(
