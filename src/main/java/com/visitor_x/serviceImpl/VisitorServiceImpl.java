@@ -97,12 +97,3 @@ public class VisitorServiceImpl implements VisitorService {
     }
 }
 
-
-        // NOTE: autoSaveToFile() removed .
-        // Render's free-tier filesystem is ephemeral — any file written to local
-        // disk here is wiped on every restart/redeploy/spin-down, so saving on
-        // every registration was wasted work for a file that wouldn't persist.
-        // The visitor data itself is safe in MySQL; use GET /api/admin/export
-        // (ExportController -> ExportService.exportVisitors) any time you need
-        // a fresh, complete Excel download generated on demand from the DB.
-
